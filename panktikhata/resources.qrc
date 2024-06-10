@@ -1,0 +1,10 @@
+<!DOCTYPE RCC>
+<RCC version="1.0">
+    <qresource prefix="icons">
+        <file alias="play_arrow.svg">assets/icons/material_play_arrow.svg</file>
+		<file alias="description.svg">assets/icons/material_description.svg</file>
+		<file alias="folder_open.svg">assets/icons/material_folder_open.svg</file>
+		<file alias="save.svg">assets/icons/material_save.svg</file>
+		<file alias="power_settings_new.svg">assets/icons/material_power_settings_new.svg</file>
+    </qresource>
+</RCC>
