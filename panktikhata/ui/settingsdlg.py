@@ -1,11 +1,18 @@
 # -*- coding: utf-8 -*-
 
-from PySide6 import QtCore, QtGui, QtWidgets  # type: ignore
+from PySide6 import QtCore, QtGui, QtWidgets
 
+from pankti.settings import PanktiSettings  # type: ignore
+
+THEME_ITEMS = ["Auto", "Light", "Dark"] # type : List[str]
+LANGUAGE_ITEMS = ["English", "Bengali"] # type : List[str]
 
 class PanktiSettingsDialog(QtWidgets.QDialog):
     def __init__(self) -> None:
         super().__init__()
+        
+        self.settings_value = PanktiSettings()
+        self.save = False
 
         self.setup_ui()
 
@@ -85,6 +92,7 @@ class PanktiSettingsDialog(QtWidgets.QDialog):
             self.scroll_area_widget_contents
         )
 
+        self.app_theme_combox_box.addItems(THEME_ITEMS)
         self.app_theme_hl.addWidget(self.app_theme_combox_box)
 
         self.vertical_layout.addLayout(self.app_theme_hl)
@@ -110,7 +118,28 @@ class PanktiSettingsDialog(QtWidgets.QDialog):
 
         # End Third Row -> Editor Theme
 
-        # Fourth Row -> Pankti Interpreter Path
+        # Fourth Row -> Language
+
+        self.language_hl = QtWidgets.QHBoxLayout()
+        self.language_label = QtWidgets.QLabel(
+            self.scroll_area_widget_contents
+        )
+
+        self.language_label.setText("Language")
+        self.language_hl.addWidget(self.language_label)
+        self.language_combox_box = QtWidgets.QComboBox(
+            self.scroll_area_widget_contents
+        )
+
+        self.language_combox_box.addItems(LANGUAGE_ITEMS)
+        self.language_hl.addWidget(self.language_combox_box)
+
+        self.vertical_layout.addLayout(self.language_hl)
+
+        # End Fourth Row -> Language
+        
+
+        # Fifth Row -> Pankti Interpreter Path
 
         self.pankti_path_hl = QtWidgets.QHBoxLayout()
         self.pankti_path_label = QtWidgets.QLabel(
@@ -137,9 +166,9 @@ class PanktiSettingsDialog(QtWidgets.QDialog):
 
         self.vertical_layout.addLayout(self.pankti_path_hl)
 
-        # End Fourth Row -> Pankti Interpreter Path
+        # End Fifth Row -> Pankti Interpreter Path
 
-        # Fifth Row -> Autosave
+        # Sixth Row -> Autosave
 
         self.autosave_hl = QtWidgets.QHBoxLayout()
         self.autosave_label = QtWidgets.QLabel(
@@ -158,7 +187,8 @@ class PanktiSettingsDialog(QtWidgets.QDialog):
 
         self.vertical_layout.addLayout(self.autosave_hl)
 
-        # End Fifth Row -> Autosave
+        # End Sixth Row -> Autosave
+
 
         self.scroll_area.setWidget(self.scroll_area_widget_contents)
 

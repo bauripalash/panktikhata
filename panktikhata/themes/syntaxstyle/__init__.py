@@ -14,6 +14,7 @@ class SyntaxStyle:
         string (str): String Color
         number (str): Number Color
         builtin (str): Builtin function Color
+        comment (str): Comments Color
     """
 
     bg: str
@@ -23,3 +24,7 @@ class SyntaxStyle:
     string: str
     number: str
     builtin: str
+    comment: str
+
+def get_stylesheet(s : SyntaxStyle) -> str:
+    return 'QPlainTextEdit { color: %s; background-color: %s }' %(s.fg, s.bg)

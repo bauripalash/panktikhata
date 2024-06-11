@@ -4,6 +4,9 @@ from PySide6.QtGui import QAction, QIcon  # type: ignore
 from PySide6.QtWidgets import QStyle  # type: ignore
 import qdarktheme
 
+from pankti import settings
+from themes import syntaxstyle
+from themes.syntaxstyle import atom_one_dark
 from ui.highlighter import PanktiSyntaxHighlighter
 from ui.settingsdlg import PanktiSettingsDialog
 from assets import resources
@@ -13,11 +16,18 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
     def __init__(self):
         super().__init__()
 
+        self.setttings = settings.PanktiSettings()
+
         self.setup_ui()
         self.setup_theme()
 
     def setup_theme(self) -> None:
-        qdarktheme.setup_theme()
+        self.editor_stylesheet = syntaxstyle.get_stylesheet(
+            atom_one_dark.theme
+        )
+        qdarktheme.setup_theme(additional_qss=self.editor_stylesheet)
+
+        #print(self.editor_stylesheet)
 
     def setup_ui(self) -> None:
         if not self.objectName():
@@ -78,7 +88,8 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
         self.editor_splitter.setOrientation(QtGui.Qt.Orientation.Vertical)
         self.input_edit = QtWidgets.QPlainTextEdit(self.editor_splitter)
 
-        self.highligher = PanktiSyntaxHighlighter(self.input_edit.document())
+        self.highlighter = PanktiSyntaxHighlighter(self.input_edit.document())
+        self.highlighter.set_theme(atom_one_dark.theme)
 
         self.input_edit.setObjectName("InputEdit")
         self.editor_splitter.addWidget(self.input_edit)
@@ -142,6 +153,8 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
     def btn_click(self, s):
         dlg = PanktiSettingsDialog()
         dlg.exec()
+
+        print(dlg.settings_value)
 
     def retranslate_ui(self):
         self.setWindowTitle(

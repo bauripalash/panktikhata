@@ -9,7 +9,7 @@ from PySide6.QtGui import (
 )  # type: ignore
 
 from pankti import keywords
-from themes.syntaxstyle import atom_one_light
+from themes.syntaxstyle import SyntaxStyle, atom_one_light
 
 
 @dataclass
@@ -26,30 +26,32 @@ class HighlightRule:
 class PanktiSyntaxHighlighter(QSyntaxHighlighter):
     def __init__(self, parent) -> None:
         super().__init__(parent)
+
+    def set_theme(self , theme : SyntaxStyle) -> None:
         keyword_format = QTextCharFormat()
         keyword_format.setForeground(
-            QBrush(QColor(atom_one_light.theme.keyword))
+            QBrush(QColor(theme.keyword))
         )
 
         literal_format = QTextCharFormat()
         literal_format.setForeground(
-            QBrush(QColor(atom_one_light.theme.literal))
+            QBrush(QColor(theme.literal))
         )
 
         string_format = QTextCharFormat()
         string_format.setForeground(
-            QBrush(QColor(atom_one_light.theme.string))
+            QBrush(QColor(theme.string))
         )
 
         number_format = QTextCharFormat()
 
         number_format.setForeground(
-            QBrush(QColor(atom_one_light.theme.number))
+            QBrush(QColor(theme.number))
         )
 
         builtin_format = QTextCharFormat()
         builtin_format.setForeground(
-            QBrush(QColor(atom_one_light.theme.builtin))
+            QBrush(QColor(theme.builtin))
         )
 
         self.highlight_rule = HighlightRule(
@@ -62,7 +64,7 @@ class PanktiSyntaxHighlighter(QSyntaxHighlighter):
 
         self.tokregex = keywords.get_patterns()
 
-    def highlight_block(self, text: str) -> None:
+    def highlightBlock(self, text: str) -> None:
         for mo in re.finditer(self.tokregex, text):
             kind = mo.lastgroup
             value = mo.group()
