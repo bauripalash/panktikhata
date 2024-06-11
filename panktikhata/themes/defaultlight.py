@@ -1,4 +1,4 @@
-themeDefaultLight = """
+THEME_DEFAULT_LIGHT = """
 
 QPushButton{
     background-color: black;
@@ -9,4 +9,4 @@ QFrame{
     color: #000000;
 }
 
-""" # type: str
+"""  # type: str

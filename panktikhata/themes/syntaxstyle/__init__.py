@@ -1,10 +1,11 @@
 from dataclasses import dataclass
 
+
 @dataclass
 class SyntaxStyle:
     """
     A class representing syntax style
-    
+
     Attributes:
         bg (str): Background Color
         fg (str): Foreground Color
@@ -14,6 +15,7 @@ class SyntaxStyle:
         number (str): Number Color
         builtin (str): Builtin function Color
     """
+
     bg: str
     fg: str
     keyword: str

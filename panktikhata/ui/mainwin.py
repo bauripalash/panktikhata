@@ -1,10 +1,10 @@
 # -*- coding: utf-8 -*-
-from PySide6 import QtCore, QtGui, QtWidgets # type: ignore
-from PySide6.QtGui import QAction, QIcon # type: ignore
-from PySide6.QtWidgets import QStyle, QStyleOption # type: ignore
+from PySide6 import QtCore, QtGui, QtWidgets  # type: ignore
+from PySide6.QtGui import QAction, QIcon  # type: ignore
+from PySide6.QtWidgets import QStyle  # type: ignore
+import qdarktheme
 
 from ui.highlighter import PanktiSyntaxHighlighter
-from themes import defaultLight
 from ui.settingsdlg import PanktiSettingsDialog
 from assets import resources
 
@@ -14,130 +14,138 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
         super().__init__()
 
         self.setup_ui()
+        self.setup_theme()
+
+    def setup_theme(self) -> None:
+        qdarktheme.setup_theme()
 
     def setup_ui(self) -> None:
         if not self.objectName():
-            self.setObjectName(u"MainWindow")
+            self.setObjectName("MainWindow")
 
-        self.setStyleSheet(defaultLight.themeDefaultLight)
+        # self.setStyleSheet(defaultLight.themeDefaultLight)
 
         self.resize(800, 600)
-        self.rootWidget = QtWidgets.QWidget()
-        self.rootWidget.setObjectName(u"rootWidget")
-        self.horizontalLayout_3 = QtWidgets.QHBoxLayout(self.rootWidget)
-        self.horizontalLayout_3.setObjectName(u"horizontalLayout_3")
-        self.mainBox = QtWidgets.QHBoxLayout()
-        self.mainBox.setObjectName(u"mainBox")
-        self.EditorBox = QtWidgets.QHBoxLayout()
-        self.EditorBox.setObjectName(u"EditorBox")
-        self.ButtonFrame = QtWidgets.QFrame(self.rootWidget)
-        self.ButtonFrame.setObjectName(u"ButtonFrame")
-        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Policy.Fixed, QtWidgets.QSizePolicy.Policy.Fixed)
-        sizePolicy.setHorizontalStretch(0)
-        sizePolicy.setVerticalStretch(0)
-        sizePolicy.setHeightForWidth(self.ButtonFrame.sizePolicy().hasHeightForWidth())
-        self.ButtonFrame.setSizePolicy(sizePolicy)
-        
-        
-        self.ButtonFrame.setFrameShape(QtWidgets.QFrame.Shape.StyledPanel)
-        self.ButtonFrame.setFrameShadow(QtWidgets.QFrame.Shadow.Raised)#QFrame.Raised)
-        self.verticalLayout_2 = QtWidgets.QVBoxLayout(self.ButtonFrame)
-        self.verticalLayout_2.setObjectName(u"verticalLayout_2")
-        self.ButtonBox = QtWidgets.QVBoxLayout()
-        self.ButtonBox.setObjectName(u"ButtonBox")
-        
+        self.root_widget = QtWidgets.QWidget()
+        self.root_widget.setObjectName("rootWidget")
+        self.horizontal_layout = QtWidgets.QHBoxLayout(self.root_widget)
+        self.horizontal_layout.setObjectName("horizontalLayout_3")
+        self.main_box = QtWidgets.QHBoxLayout()
+        self.main_box.setObjectName("mainBox")
+        self.editor_box = QtWidgets.QHBoxLayout()
+        self.editor_box.setObjectName("EditorBox")
+        self.button_frame = QtWidgets.QFrame(self.root_widget)
+        self.button_frame.setObjectName("ButtonFrame")
+        size_policy = QtWidgets.QSizePolicy(
+            QtWidgets.QSizePolicy.Policy.Fixed,
+            QtWidgets.QSizePolicy.Policy.Fixed,
+        )
+        size_policy.setHorizontalStretch(0)
+        size_policy.setVerticalStretch(0)
+        size_policy.setHeightForWidth(
+            self.button_frame.sizePolicy().hasHeightForWidth()
+        )
+        self.button_frame.setSizePolicy(size_policy)
 
-        self.runPm = QStyle.StandardPixmap.SP_MediaPlay
-        self.runIcon = self.style().standardIcon(self.runPm)
-        self.RunButton = QtWidgets.QPushButton(self.ButtonFrame)
-        self.RunButton.setObjectName(u"RunButton")
+        self.button_frame.setFrameShape(QtWidgets.QFrame.Shape.StyledPanel)
+        self.button_frame.setFrameShadow(
+            QtWidgets.QFrame.Shadow.Raised
+        )  # QFrame.Raised)
+        self.vertical_layout_2 = QtWidgets.QVBoxLayout(self.button_frame)
+        self.vertical_layout_2.setObjectName("verticalLayout_2")
+        self.button_box = QtWidgets.QVBoxLayout()
+        self.button_box.setObjectName("ButtonBox")
 
-        self.RunButton.setIcon(self.runIcon)
+        self.run_pm = QStyle.StandardPixmap.SP_MediaPlay
 
-        self.RunButton.clicked.connect(self.btnClick)
+        self.run_icon = self.style().standardIcon(self.run_pm)
 
+        self.run_button = QtWidgets.QPushButton(self.button_frame)
+        self.run_button.setObjectName("RunButton")
+        self.run_button.setIcon(self.run_icon)
+        self.run_button.clicked.connect(self.btn_click)
+        self.button_box.addWidget(
+            self.run_button, 0, QtGui.Qt.AlignmentFlag.AlignTop
+        )
+        self.vertical_layout_2.addLayout(self.button_box)
 
-        self.ButtonBox.addWidget(self.RunButton, 0, QtGui.Qt.AlignmentFlag.AlignTop)
-        
+        self.editor_box.addWidget(
+            self.button_frame, 0, QtGui.Qt.AlignmentFlag.AlignTop
+        )
 
-        self.verticalLayout_2.addLayout(self.ButtonBox)
+        self.editor_splitter = QtWidgets.QSplitter(self.root_widget)
+        self.editor_splitter.setObjectName("EditorSplitter")
+        self.editor_splitter.setOrientation(QtGui.Qt.Orientation.Vertical)
+        self.input_edit = QtWidgets.QPlainTextEdit(self.editor_splitter)
 
+        self.highligher = PanktiSyntaxHighlighter(self.input_edit.document())
 
-        self.EditorBox.addWidget(self.ButtonFrame, 0, QtGui.Qt.AlignmentFlag.AlignTop)
+        self.input_edit.setObjectName("InputEdit")
+        self.editor_splitter.addWidget(self.input_edit)
 
-        self.EditorSplitter = QtWidgets.QSplitter(self.rootWidget)
-        self.EditorSplitter.setObjectName(u"EditorSplitter")
-        self.EditorSplitter.setOrientation(QtGui.Qt.Orientation.Vertical)
-        self.InputEdit = QtWidgets.QPlainTextEdit(self.EditorSplitter)
-        
-        self.highligher = PanktiSyntaxHighlighter(self.InputEdit.document())
+        self.output_edit = QtWidgets.QPlainTextEdit(self.editor_splitter)
+        self.output_edit.setObjectName("OutputEdit")
+        self.editor_splitter.addWidget(self.output_edit)
 
-        self.InputEdit.setObjectName(u"InputEdit")
-        self.EditorSplitter.addWidget(self.InputEdit)
+        self.editor_box.addWidget(self.editor_splitter)
 
-        self.OutputEdit = QtWidgets.QPlainTextEdit(self.EditorSplitter)
-        self.OutputEdit.setObjectName(u"OutputEdit")
-        self.EditorSplitter.addWidget(self.OutputEdit)
+        self.main_box.addLayout(self.editor_box)
 
-        self.EditorBox.addWidget(self.EditorSplitter)
+        self.horizontal_layout.addLayout(self.main_box)
 
-
-        self.mainBox.addLayout(self.EditorBox)
-
-
-        self.horizontalLayout_3.addLayout(self.mainBox)
-
-        self.setCentralWidget(self.rootWidget)
+        self.setCentralWidget(self.root_widget)
         self.menubar = QtWidgets.QMenuBar()
         self.statusbar = QtWidgets.QStatusBar()
-        self.statusbar.setObjectName(u"statusbar")
+        self.statusbar.setObjectName("statusbar")
         self.setStatusBar(self.statusbar)
 
-        self.retranslateUi()
-        self.setupMenu()
-
-        
+        self.retranslate_ui()
+        self.setup_menu()
 
         QtCore.QMetaObject.connectSlotsByName(self)
 
-    def setupMenu(self):
-        self.newMenuAction = QAction(QIcon(":/icons/description.svg"), "&New", self)
-        self.openMenuAction = QAction(QIcon(":/icons/folder_open.svg"), "&Open", self)
-        self.saveMenuAction = QAction(QIcon(":/icons/save.svg"), "&Save", self)
-        self.quitMenuAction = QAction(QIcon(":/icons/power_settings_new.svg"), "&Quit", self)
+    def setup_menu(self):
+        self.new_menu_action = QAction(
+            QIcon(":/icons/description.svg"), "&New", self
+        )
+        self.open_menu_action = QAction(
+            QIcon(":/icons/folder_open.svg"), "&Open", self
+        )
+        self.save_menu_action = QAction(
+            QIcon(":/icons/save.svg"), "&Save", self
+        )
 
+        self.quit_menu_action = QAction(
+            QIcon(":/icons/power_settings_new.svg"), "&Quit", self
+        )
 
-        self.fileMenu = self.menubar.addMenu("&File")
-        self.fileMenu.addAction(self.newMenuAction)
-        self.fileMenu.addAction(self.openMenuAction)
-        self.fileMenu.addAction(self.saveMenuAction)
-        self.fileMenu.addSeparator()
-        self.fileMenu.addAction(self.quitMenuAction)
+        self.file_menu = self.menubar.addMenu("&File")
+        self.file_menu.addAction(self.new_menu_action)
+        self.file_menu.addAction(self.open_menu_action)
+        self.file_menu.addAction(self.save_menu_action)
+        self.file_menu.addSeparator()
+        self.file_menu.addAction(self.quit_menu_action)
 
+        self.undo_menu_action = QAction()
+        self.redo_menu_action = QAction()
+        self.cut_menu_action = QAction()
 
-        self.undoMenuAction = QAction()
-        self.redoMenuAction = QAction()
-        self.cutMenuAction  = QAction()
-        self.copyMenuAction = QAction()
-        self.pasteMenuAction = QAction()
-        self.selectAllMenuAction = QAction()
+        self.copy_menu_action = QAction()
+        self.paste_menu_action = QAction()
+        self.select_all_menu_action = QAction()
 
-        self.findMenuAction = QAction()
-        self.findAndReplaceMenuAction = QAction()
-
-
-
+        self.find_menu_action = QAction()
+        self.find_and_replace_menu_ction = QAction()
 
         self.setMenuBar(self.menubar)
-        
 
-    def btnClick(self, s):
+    def btn_click(self, s):
         dlg = PanktiSettingsDialog()
         dlg.exec()
 
-    def retranslateUi(self):
-        self.setWindowTitle(QtCore.QCoreApplication.translate("MainWindow", u"Pankti Khata", None))
-        #self.RunButton.setText(QtCore.QCoreApplication.translate("MainWindow", u"Run", None))
-
-
-
+    def retranslate_ui(self):
+        self.setWindowTitle(
+            QtCore.QCoreApplication.translate(
+                "MainWindow", "Pankti Khata", None
+            )
+        )

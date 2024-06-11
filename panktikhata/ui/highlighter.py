@@ -1,10 +1,16 @@
 from dataclasses import dataclass
 import re
-from PySide6 import QtGui # type: ignore
-from PySide6.QtGui import (QBrush, QColor,QSyntaxHighlighter, QTextCharFormat) # type: ignore
+from PySide6 import QtGui  # type: ignore
+from PySide6.QtGui import (
+    QBrush,
+    QColor,
+    QSyntaxHighlighter,
+    QTextCharFormat,
+)  # type: ignore
 
 from pankti import keywords
 from themes.syntaxstyle import atom_one_light
+
 
 @dataclass
 class HighlightRule:
@@ -13,59 +19,66 @@ class HighlightRule:
     string: QtGui.QTextCharFormat
     number: QtGui.QTextCharFormat
     builtin: QtGui.QTextCharFormat
-    bg: QtGui.QTextCharFormat|None = None
-    fg: QtGui.QTextCharFormat|None = None
+    bg: QtGui.QTextCharFormat | None = None
+    fg: QtGui.QTextCharFormat | None = None
+
 
 class PanktiSyntaxHighlighter(QSyntaxHighlighter):
     def __init__(self, parent) -> None:
         super().__init__(parent)
-        keywordFormat = QTextCharFormat()
-        keywordFormat.setForeground(QBrush(QColor(atom_one_light.theme.keyword)))
-
-        literalFormat = QTextCharFormat()
-        literalFormat.setForeground(QBrush(QColor(atom_one_light.theme.literal)))
-
-        stringFormat = QTextCharFormat()
-        stringFormat.setForeground(QBrush(QColor(atom_one_light.theme.string)))
-
-
-        numberFormat = QTextCharFormat()
-        numberFormat.setForeground(QBrush(QColor(atom_one_light.theme.number)))
-
-        builtinFormat = QTextCharFormat()
-        builtinFormat.setForeground(QBrush(QColor(atom_one_light.theme.builtin)))
-
-       
-        self.highlightRule = HighlightRule(
-            keyword=keywordFormat,
-            literal=literalFormat,
-            string=stringFormat,
-            number=numberFormat,
-            builtin=builtinFormat
+        keyword_format = QTextCharFormat()
+        keyword_format.setForeground(
+            QBrush(QColor(atom_one_light.theme.keyword))
         )
 
-        self.tokregex = keywords.getPatterns()
-        
+        literal_format = QTextCharFormat()
+        literal_format.setForeground(
+            QBrush(QColor(atom_one_light.theme.literal))
+        )
 
+        string_format = QTextCharFormat()
+        string_format.setForeground(
+            QBrush(QColor(atom_one_light.theme.string))
+        )
 
-    def highlightBlock(self, text: str) -> None:
+        number_format = QTextCharFormat()
+
+        number_format.setForeground(
+            QBrush(QColor(atom_one_light.theme.number))
+        )
+
+        builtin_format = QTextCharFormat()
+        builtin_format.setForeground(
+            QBrush(QColor(atom_one_light.theme.builtin))
+        )
+
+        self.highlight_rule = HighlightRule(
+            keyword=keyword_format,
+            literal=literal_format,
+            string=string_format,
+            number=number_format,
+            builtin=builtin_format,
+        )
+
+        self.tokregex = keywords.get_patterns()
+
+    def highlight_block(self, text: str) -> None:
         for mo in re.finditer(self.tokregex, text):
             kind = mo.lastgroup
             value = mo.group()
             start = mo.start()
             length = mo.end() - start
 
-            if kind == 'IDENT':
+            if kind == "IDENT":
                 if value in keywords.KEYWORDS:
-                    self.setFormat(start, length, self.highlightRule.keyword)
+                    self.setFormat(start, length, self.highlight_rule.keyword)
                 elif value in keywords.LITERALS:
-                    self.setFormat(start, length, self.highlightRule.literal)
+                    self.setFormat(start, length, self.highlight_rule.literal)
                 elif value in keywords.BUILTINS:
-                    self.setFormat(start, length, self.highlightRule.builtin)
+                    self.setFormat(start, length, self.highlight_rule.builtin)
             elif kind == "STRING":
-                self.setFormat(start, length, self.highlightRule.string)
+                self.setFormat(start, length, self.highlight_rule.string)
             elif kind == "NUMBER":
-                self.setFormat(start, length, self.highlightRule.number)
+                self.setFormat(start, length, self.highlight_rule.number)
             elif kind == "SKIP":
                 continue
-
