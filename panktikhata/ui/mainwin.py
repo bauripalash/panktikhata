@@ -1,15 +1,17 @@
 # -*- coding: utf-8 -*-
 from PySide6 import QtCore, QtGui, QtWidgets  # type: ignore
-from PySide6.QtGui import QAction, QIcon  # type: ignore
-from PySide6.QtWidgets import QStyle  # type: ignore
+from PySide6.QtGui import QAction, QFontDatabase, QIcon  # type: ignore
+from PySide6.QtWidgets import QCompleter, QStyle  # type: ignore
 import qdarktheme
 
 from pankti import settings
+from ui.editor import PanktiEditor
 from themes import syntaxstyle
 from themes.syntaxstyle import atom_one_dark
 from ui.highlighter import PanktiSyntaxHighlighter
 from ui.settingsdlg import PanktiSettingsDialog
 from assets import resources
+
 
 
 class Ui_MainWindow(QtWidgets.QMainWindow):
@@ -22,6 +24,11 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
         self.setup_theme()
 
     def setup_theme(self) -> None:
+
+        self.fontdb = QFontDatabase()
+
+        self.fontdb.addApplicationFont(":/fonts/noto_regular.ttf")
+        self.fontdb.addApplicationFont(":/fonts/noto_bold.ttf")
         self.editor_stylesheet = syntaxstyle.get_stylesheet(
             atom_one_dark.theme
         )
@@ -34,6 +41,8 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
             self.setObjectName("MainWindow")
 
         # self.setStyleSheet(defaultLight.themeDefaultLight)
+
+        self.autocomplete_words = ["dhori", "kaj", "nil"]
 
         self.resize(800, 600)
         self.root_widget = QtWidgets.QWidget()
@@ -86,7 +95,12 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
         self.editor_splitter = QtWidgets.QSplitter(self.root_widget)
         self.editor_splitter.setObjectName("EditorSplitter")
         self.editor_splitter.setOrientation(QtGui.Qt.Orientation.Vertical)
-        self.input_edit = QtWidgets.QPlainTextEdit(self.editor_splitter)
+        self.input_edit = PanktiEditor(self.editor_splitter)
+        #self.input_edit.comps.setStringList(["dhori", "kaj"])
+
+        #QtWidgets.QPlainTextEdit(self.editor_splitter)
+
+
 
         self.highlighter = PanktiSyntaxHighlighter(self.input_edit.document())
         self.highlighter.set_theme(atom_one_dark.theme)
