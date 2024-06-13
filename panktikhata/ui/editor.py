@@ -1,5 +1,5 @@
 from PySide6.QtCore import QStringListModel, Qt
-from PySide6.QtGui import QFont, QFontDatabase, QKeyEvent, QTextCursor
+from PySide6.QtGui import QKeyEvent, QTextCursor
 from PySide6.QtWidgets import QCompleter, QPlainTextEdit
 from pankti.keywords import KEYWORDS, LITERALS, BUILTINS
 
@@ -20,8 +20,7 @@ class PanktiEditor(QPlainTextEdit):
         self.completer.setCaseSensitivity(Qt.CaseSensitivity.CaseInsensitive)
         self.completer.activated.connect(self.insert_completion)
 
-        
-        #self.setFont(QFont("Noto Serif Bengali", 14))
+        # self.setFont(QFont("Noto Serif Bengali", 14))
 
         self.tail: str = " "
         self.ignore_return: bool = False

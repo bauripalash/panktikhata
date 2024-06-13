@@ -1,6 +1,7 @@
 from themes.syntaxclass import SyntaxStyle
 
 one_light_theme = SyntaxStyle(
+    tname="OneLight",
     bg="#fafafa",
     fg="#383a42",
     keyword="#a626a4",

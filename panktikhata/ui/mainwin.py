@@ -1,45 +1,48 @@
 # -*- coding: utf-8 -*-
 from PySide6 import QtCore, QtGui, QtWidgets  # type: ignore
 from PySide6.QtGui import QAction, QFont, QFontDatabase, QIcon  # type: ignore
-from PySide6.QtWidgets import QCompleter, QStyle  # type: ignore
+from PySide6.QtWidgets import QStyle  # type: ignore
 import qdarktheme
 
 from pankti import settings
 from ui.editor import PanktiEditor
 from themes import syntaxclass
-from themes.syntaxstyle import *
 from ui.highlighter import PanktiSyntaxHighlighter
 from ui.settingsdlg import PanktiSettingsDialog
-from assets import resources
 
-
-T = dracula.dracula_theme
+from assets import resources  # noqa: F401
 
 
 class Ui_MainWindow(QtWidgets.QMainWindow):
     def __init__(self):
         super().__init__()
 
-        self.settings = settings.PanktiSettings()
-
+        self.settings = self.load_settings()
 
         self.setup_theme()
         self.setup_ui()
         self.setup_font()
 
-    def setup_theme(self) -> None:
+    def load_settings(self) -> settings.PanktiSettings:
+        s, _ = settings.get_settings_from_conf("./panktikhata.pickle")
+        return s
 
+    def setup_theme(self) -> None:
         self.fontdb = QFontDatabase()
 
         self.fontdb.addApplicationFont(":/fonts/noto_regular.ttf")
         self.fontdb.addApplicationFont(":/fonts/noto_bold.ttf")
-        self.editor_stylesheet = syntaxclass.get_stylesheet(self.settings.editor_theme, self.settings.font_size)
-        qdarktheme.setup_theme(theme=settings.app_theme_to_str(self.settings.app_theme), additional_qss=self.editor_stylesheet)
-
+        self.editor_stylesheet = syntaxclass.get_stylesheet(
+            self.settings.editor_theme, self.settings.font_size
+        )
+        qdarktheme.setup_theme(
+            theme=settings.app_theme_to_str(self.settings.app_theme),
+            additional_qss=self.editor_stylesheet,
+        )
 
         # print(self.editor_stylesheet)
-    def setup_font(self) -> None:
 
+    def setup_font(self) -> None:
         self.editor_font = QFont("Noto Serif Bengali", self.settings.font_size)
         self.input_edit.setFont(self.editor_font)
         self.output_edit.setFont(self.editor_font)
@@ -109,7 +112,7 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
         # QtWidgets.QPlainTextEdit(self.editor_splitter)
 
         self.highlighter = PanktiSyntaxHighlighter(self.input_edit.document())
-        self.highlighter.set_theme(T)
+        self.highlighter.set_theme(self.settings.editor_theme)
 
         self.input_edit.setObjectName("InputEdit")
         self.editor_splitter.addWidget(self.input_edit)
@@ -177,21 +180,19 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
         self.output_edit.update()
 
         self.setup_font()
-        
 
-    def btn_click(self, s):
+    def btn_click(self, _):
         dlg = PanktiSettingsDialog()
         dlg.setup(self.settings)
         dlg.exec()
 
-
-
         if dlg.save:
             self.settings = dlg.settings_value
             self.redraw_settings()
-            print(self.settings)
+            # print(self.settings.to_pickle().decode())
+            self.settings.dump_settings("./panktikhata.pickle")
         else:
-            return
+            dlg.destroy()
 
     def retranslate_ui(self):
         self.setWindowTitle(

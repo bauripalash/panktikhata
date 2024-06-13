@@ -1,6 +1,7 @@
 from themes.syntaxclass import SyntaxStyle
 
 far_theme = SyntaxStyle(
+    tname="Far",
     bg="#000080",
     fg="#0ff",
     keyword="#fff",

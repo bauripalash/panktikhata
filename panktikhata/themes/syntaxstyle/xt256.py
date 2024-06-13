@@ -1,6 +1,7 @@
 from themes.syntaxclass import SyntaxStyle
 
 xt256_theme = SyntaxStyle(
+    tname="xt256",
     bg="#000",
     fg="#eaeaea",
     keyword="#fff000",

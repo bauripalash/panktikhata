@@ -1,6 +1,7 @@
 from themes.syntaxclass import SyntaxStyle
 
 tokyo_night_light_theme = SyntaxStyle(
+    tname="Tokyo Night Light",
     bg="#d5d6db",
     fg="#565a6e",
     keyword="#5a4a78",

@@ -12,8 +12,8 @@ rc:
 run:
 	poetry run python $(MAIN_SCRIPT)
 
-flake8:
-	poetry run flake8
+format:
+	poetry run ruff format $(MODULE_DIR) 
 
-black:
-	poetry run black panktikhata/
+lint:
+	poetry run ruff check $(MODULE_DIR)

@@ -1,6 +1,7 @@
 from themes.syntaxclass import SyntaxStyle
 
 stackoverflow_light_theme = SyntaxStyle(
+    tname="StackOverflow Light",
     bg="#f6f6f6",
     fg="#2f3337",
     keyword="#015692",

@@ -1,6 +1,7 @@
 from themes.syntaxclass import SyntaxStyle
 
 spacemacs_theme = SyntaxStyle(
+    tname="Spacemacs",
     bg="#1f2022",
     fg="#a3a3a3",
     keyword="#a31db1",

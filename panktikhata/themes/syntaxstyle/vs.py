@@ -1,6 +1,7 @@
 from themes.syntaxclass import SyntaxStyle
 
 vs_theme = SyntaxStyle(
+    tname="VS",
     bg="white",
     fg="black",
     keyword="#00f",

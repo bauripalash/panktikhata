@@ -1,6 +1,7 @@
 from themes.syntaxclass import SyntaxStyle
 
 grayscale_theme = SyntaxStyle(
+    tname="Grayscale",
     bg="#fff",
     fg="#333",
     keyword="#333",

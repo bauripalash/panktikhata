@@ -1,6 +1,7 @@
 from themes.syntaxclass import SyntaxStyle
 
 dracula_theme = SyntaxStyle(
+    tname="Dracula",
     bg="#282936",
     fg="#e9e9f4",
     keyword="#b45bcf",

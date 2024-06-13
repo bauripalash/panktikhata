@@ -1,6 +1,7 @@
 from themes.syntaxclass import SyntaxStyle
 
 googlecode_theme = SyntaxStyle(
+    tname="GoogleCode",
     bg="white",
     fg="black",
     keyword="#008",

@@ -1,6 +1,7 @@
 from themes.syntaxclass import SyntaxStyle
 
 nord_theme = SyntaxStyle(
+    tname="Nord",
     bg="#2E3440",
     fg="#E5E9F0",
     keyword="#B48EAD",

@@ -1,6 +1,7 @@
 from themes.syntaxclass import SyntaxStyle
 
 tomorrow_night_blue_theme = SyntaxStyle(
+    tname="Tomorrow Night Blue",
     bg="#002451",
     fg="black",
     keyword="#ebbbff",

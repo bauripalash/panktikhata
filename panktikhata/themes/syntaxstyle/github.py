@@ -1,6 +1,7 @@
 from themes.syntaxclass import SyntaxStyle
 
 github_theme = SyntaxStyle(
+    tname="GitHub",
     bg="#fff",
     fg="#333",
     keyword="#a71d5d",

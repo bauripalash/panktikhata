@@ -1,6 +1,7 @@
 from themes.syntaxclass import SyntaxStyle
 
 monokai_theme = SyntaxStyle(
+    tname="Monokai",
     bg="#272822",
     fg="#f8f8f2",
     keyword="#ae81ff",

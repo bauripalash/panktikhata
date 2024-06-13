@@ -1,6 +1,7 @@
 from themes.syntaxclass import SyntaxStyle
 
 onedark_theme = SyntaxStyle(
+    tname="OneDark",
     bg="#282c34",
     fg="#abb2bf",
     keyword="#c678dd",

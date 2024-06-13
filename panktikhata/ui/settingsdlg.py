@@ -5,9 +5,18 @@ from PySide6 import QtCore, QtGui, QtWidgets
 from pankti.settings import AppLanguage, AppTheme, PanktiSettings
 from themes.syntaxstyle import THEMES  # type: ignore
 
-APP_THEMES = { "auto" : ("Auto", AppTheme.AUTO), "dark": ("Dark", AppTheme.DARK), "light": ("Light", AppTheme.LIGHT) }
-LANGUAGE_ITEMS = {"en": ("English", AppLanguage.ENGLISH), "bn": ( "Bengali" , AppLanguage.BENGALI)}  # type : Dict[str, str]
-EDITOR_THEMES = [(key, value[0]) for key, value in THEMES.items()]
+APP_THEMES = {
+    "auto": ("Auto", AppTheme.AUTO),
+    "dark": ("Dark", AppTheme.DARK),
+    "light": ("Light", AppTheme.LIGHT),
+}
+LANGUAGE_ITEMS = {
+    "en": ("English", AppLanguage.ENGLISH),
+    "bn": ("Bengali", AppLanguage.BENGALI),
+}  # type : Dict[str, str]
+
+EDITOR_THEMES = [(key, value.tname) for key, value in THEMES.items()]
+
 
 class PanktiSettingsDialog(QtWidgets.QDialog):
     def __init__(self) -> None:
@@ -16,30 +25,11 @@ class PanktiSettingsDialog(QtWidgets.QDialog):
         self.settings_value = PanktiSettings()
         self.save = False
 
-    def setup(self , s : PanktiSettings):
+    def setup(self, s: PanktiSettings):
         self.settings_value = s
         self.setup_ui()
-    
-    def app_theme_changed(self, _: int) -> None:
-        d = self.app_theme_combo_box.currentData()
-        self.settings_value.app_theme = APP_THEMES[d][1]
-
-    def language_changed(self, _: int) -> None:
-        d = self.language_combo_box.currentData()
-        self.settings_value.language = LANGUAGE_ITEMS[d][1]
-        
-
-    def editor_theme_changed(self, _: int) -> None:
-        d = self.editor_theme_combo_box.currentData()
-        self.settings_value.editor_theme = THEMES[d][1]
-
-    def font_size_changed(self , _ : int) -> None:
-        self.settings_value.font_size = self.font_size_spin_box.value()
-
-
 
     def setup_ui(self) -> None:
-
         self.resize(539, 447)
         self.grid_layout = QtWidgets.QGridLayout(self)
         self.main_layout = QtWidgets.QVBoxLayout()
@@ -95,8 +85,6 @@ class PanktiSettingsDialog(QtWidgets.QDialog):
 
         self.font_size_spin_box.setValue(self.settings_value.font_size)
 
-        self.font_size_spin_box.valueChanged.connect(self.font_size_changed)
-
         self.font_size_hl.addWidget(self.font_size_label)
         self.font_size_hl.addWidget(self.font_size_spin_box)
 
@@ -121,11 +109,6 @@ class PanktiSettingsDialog(QtWidgets.QDialog):
         for k, v in APP_THEMES.items():
             self.app_theme_combo_box.addItem(v[0], k)
 
-
-        self.app_theme_combo_box.currentIndexChanged.connect(
-            self.app_theme_changed
-        )
-
         self.app_theme_hl.addWidget(self.app_theme_combo_box)
 
         self.vertical_layout.addLayout(self.app_theme_hl)
@@ -147,10 +130,9 @@ class PanktiSettingsDialog(QtWidgets.QDialog):
         for item in EDITOR_THEMES:
             self.editor_theme_combo_box.addItem(item[1], item[0])
 
-        self.editor_theme_combo_box.currentIndexChanged.connect(
-            self.editor_theme_changed
+        self.editor_theme_combo_box.setCurrentText(
+            self.settings_value.editor_theme.tname
         )
-
 
         self.editor_theme_hl.addWidget(self.editor_theme_label)
         self.editor_theme_hl.addWidget(self.editor_theme_combo_box)
@@ -174,10 +156,6 @@ class PanktiSettingsDialog(QtWidgets.QDialog):
 
         for k, v in LANGUAGE_ITEMS.items():
             self.language_combo_box.addItem(v[0], k)
-
-        self.language_combo_box.currentIndexChanged.connect(
-            self.language_changed
-        )
 
         self.language_hl.addWidget(self.language_combo_box)
 
@@ -228,7 +206,6 @@ class PanktiSettingsDialog(QtWidgets.QDialog):
             self.scroll_area_widget_contents
         )
         self.autosave_check_box.setTristate(False)
-        
 
         self.autosave_hl.addWidget(self.autosave_check_box)
 
@@ -281,14 +258,23 @@ class PanktiSettingsDialog(QtWidgets.QDialog):
 
         QtCore.QMetaObject.connectSlotsByName(self)
 
-    def clicked_cancel(self, v) -> None:
+    def clicked_cancel(self, _) -> None:
         self.save = False
+        self.done(0)
 
-        self.reject()
+    def clicked_save(self, _) -> None:
+        d = self.app_theme_combo_box.currentData()
+        self.settings_value.app_theme = APP_THEMES[d][1]
 
-    def clicked_save(self , v) -> None:
+        d = self.language_combo_box.currentData()
+        self.settings_value.language = LANGUAGE_ITEMS[d][1]
+
+        d = self.editor_theme_combo_box.currentData()
+        self.settings_value.editor_theme = THEMES[d]
+
+        self.settings_value.font_size = self.font_size_spin_box.value()
         self.save = True
-        self.accept()
+        self.done(0)
 
     # setupUi
 

@@ -9,8 +9,7 @@ from PySide6.QtGui import (
 )  # type: ignore
 
 from pankti import keywords
-from themes.syntaxstyle import *
-from themes.syntaxclass import *
+from themes.syntaxclass import SyntaxStyle
 
 
 @dataclass

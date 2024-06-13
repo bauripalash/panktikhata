@@ -1,6 +1,7 @@
 from themes.syntaxclass import SyntaxStyle
 
 obsidian_theme = SyntaxStyle(
+    tname="Obsidian",
     bg="#282b2e",
     fg="#e0e2e4",
     keyword="#93c763",

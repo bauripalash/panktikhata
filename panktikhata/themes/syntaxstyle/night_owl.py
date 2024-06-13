@@ -1,6 +1,7 @@
 from themes.syntaxclass import SyntaxStyle
 
 night_owl_theme = SyntaxStyle(
+    tname="Night Owl",
     bg="#011627",
     fg="#d6deeb",
     keyword="#c792ea",

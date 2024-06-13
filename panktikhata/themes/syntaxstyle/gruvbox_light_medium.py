@@ -1,6 +1,7 @@
 from themes.syntaxclass import SyntaxStyle
 
 gruvbox_light_medium_theme = SyntaxStyle(
+    tname="Gruvbox Light",
     bg="#fbf1c7",
     fg="#504945",
     keyword="#8f3f71",

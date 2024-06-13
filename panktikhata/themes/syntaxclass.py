@@ -1,12 +1,13 @@
 from dataclasses import dataclass
 
 
-@dataclass
+@dataclass(init=True)
 class SyntaxStyle:
     """
     A class representing syntax style
 
     Attributes:
+        name (str): Name of Theme
         bg (str): Background Color
         fg (str): Foreground Color
         keyword (str): Keyword Color
@@ -25,7 +26,11 @@ class SyntaxStyle:
     number: str
     builtin: str
     comment: str
+    tname: str
 
 
-def get_stylesheet(s: SyntaxStyle, fontsize : int) -> str:
-    return "QPlainTextEdit { font-size: %d; color: %s; background-color: %s }" % (fontsize, s.fg, s.bg)
+def get_stylesheet(s: SyntaxStyle, fontsize: int) -> str:
+    return (
+        "QPlainTextEdit { font-size: %d; color: %s; background-color: %s }"
+        % (fontsize, s.fg, s.bg)
+    )

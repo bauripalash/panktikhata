@@ -1,6 +1,7 @@
 from themes.syntaxclass import SyntaxStyle
 
 atom_one_light_theme = SyntaxStyle(
+    tname="Atom One Light",
     bg="#fafafa",
     fg="#383a42",
     keyword="#a626a4",
