@@ -8,25 +8,23 @@ class PanktiEditor(QPlainTextEdit):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
-
         self.comp_words = []
         self.comp_words.extend(KEYWORDS)
         self.comp_words.extend(LITERALS)
         self.comp_words.extend(BUILTINS)
 
         self.comps = QStringListModel(self.comp_words)
-        self.completer =  QCompleter(self.comps, self)
+        self.completer = QCompleter(self.comps, self)
         self.completer.setWidget(self)
 
         self.completer.setCaseSensitivity(Qt.CaseSensitivity.CaseInsensitive)
         self.completer.activated.connect(self.insert_completion)
 
         
-        self.setFont(QFont("Noto Serif Bengali", 14))
+        #self.setFont(QFont("Noto Serif Bengali", 14))
 
-        self.tail : str = " "
-        self.ignore_return : bool = False
-
+        self.tail: str = " "
+        self.ignore_return: bool = False
 
     def complete(self):
         cur = self.textCursor()
@@ -40,27 +38,28 @@ class PanktiEditor(QPlainTextEdit):
 
             popup.setCurrentIndex(self.completer.completionModel().index(0, 0))
             cr = self.cursorRect()
-            cr.setWidth(popup.sizeHintForColumn(0)
-                        + popup.verticalScrollBar().sizeHint().width())
+            cr.setWidth(
+                popup.sizeHintForColumn(0)
+                + popup.verticalScrollBar().sizeHint().width()
+            )
 
             self.completer.complete(cr)
         else:
             self.completer.popup().hide()
 
-    def insert_completion(self , comp) -> None:
+    def insert_completion(self, comp) -> None:
         cur = self.textCursor()
         cur.select(QTextCursor.SelectionType.WordUnderCursor)
         cur.insertText(comp + self.tail)
 
     def keyPressEvent(self, e: QKeyEvent) -> None:
         if self.completer.popup().isVisible() and e.key() in [
-                Qt.Key.Key_Up,
-                Qt.Key.Key_Down,
-                Qt.Key.Key_Enter,
-                Qt.Key.Key_Return,
-                Qt.Key.Key_Tab,
-                Qt.Key.Key_Backtab,
-
+            Qt.Key.Key_Up,
+            Qt.Key.Key_Down,
+            Qt.Key.Key_Enter,
+            Qt.Key.Key_Return,
+            Qt.Key.Key_Tab,
+            Qt.Key.Key_Backtab,
         ]:
             e.ignore()
             return
@@ -72,8 +71,8 @@ class PanktiEditor(QPlainTextEdit):
             return
 
         if self.ignore_return and e.key() in [
-                Qt.Key.Key_Enter,
-                Qt.Key.Key_Return
+            Qt.Key.Key_Enter,
+            Qt.Key.Key_Return,
         ]:
             e.ignore()
             return

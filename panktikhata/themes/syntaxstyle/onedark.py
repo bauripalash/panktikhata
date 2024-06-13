@@ -1,12 +1,12 @@
 from themes.syntaxclass import SyntaxStyle
 
-atom_one_dark_theme = SyntaxStyle(
+onedark_theme = SyntaxStyle(
     bg="#282c34",
     fg="#abb2bf",
     keyword="#c678dd",
-    literal="#56b6c2",
+    literal="#d19a66",
     string="#98c379",
     number="#d19a66",
     builtin="#abb2bf",
-    comment="#5c6370",
+    comment="#545862",
 )  # type: SyntaxStyle

@@ -2,19 +2,41 @@
 
 from PySide6 import QtCore, QtGui, QtWidgets
 
-from pankti.settings import PanktiSettings  # type: ignore
+from pankti.settings import AppLanguage, AppTheme, PanktiSettings
+from themes.syntaxstyle import THEMES  # type: ignore
 
-THEME_ITEMS = ["Auto", "Light", "Dark"] # type : List[str]
-LANGUAGE_ITEMS = ["English", "Bengali"] # type : List[str]
+APP_THEMES = { "auto" : ("Auto", AppTheme.AUTO), "dark": ("Dark", AppTheme.DARK), "light": ("Light", AppTheme.LIGHT) }
+LANGUAGE_ITEMS = {"en": ("English", AppLanguage.ENGLISH), "bn": ( "Bengali" , AppLanguage.BENGALI)}  # type : Dict[str, str]
+EDITOR_THEMES = [(key, value[0]) for key, value in THEMES.items()]
 
 class PanktiSettingsDialog(QtWidgets.QDialog):
     def __init__(self) -> None:
         super().__init__()
-        
+
         self.settings_value = PanktiSettings()
         self.save = False
 
+    def setup(self , s : PanktiSettings):
+        self.settings_value = s
         self.setup_ui()
+    
+    def app_theme_changed(self, _: int) -> None:
+        d = self.app_theme_combo_box.currentData()
+        self.settings_value.app_theme = APP_THEMES[d][1]
+
+    def language_changed(self, _: int) -> None:
+        d = self.language_combo_box.currentData()
+        self.settings_value.language = LANGUAGE_ITEMS[d][1]
+        
+
+    def editor_theme_changed(self, _: int) -> None:
+        d = self.editor_theme_combo_box.currentData()
+        self.settings_value.editor_theme = THEMES[d][1]
+
+    def font_size_changed(self , _ : int) -> None:
+        self.settings_value.font_size = self.font_size_spin_box.value()
+
+
 
     def setup_ui(self) -> None:
 
@@ -71,6 +93,10 @@ class PanktiSettingsDialog(QtWidgets.QDialog):
             self.scroll_area_widget_contents
         )
 
+        self.font_size_spin_box.setValue(self.settings_value.font_size)
+
+        self.font_size_spin_box.valueChanged.connect(self.font_size_changed)
+
         self.font_size_hl.addWidget(self.font_size_label)
         self.font_size_hl.addWidget(self.font_size_spin_box)
 
@@ -88,12 +114,19 @@ class PanktiSettingsDialog(QtWidgets.QDialog):
 
         self.app_theme_hl.addWidget(self.app_theme_label)
 
-        self.app_theme_combox_box = QtWidgets.QComboBox(
+        self.app_theme_combo_box = QtWidgets.QComboBox(
             self.scroll_area_widget_contents
         )
 
-        self.app_theme_combox_box.addItems(THEME_ITEMS)
-        self.app_theme_hl.addWidget(self.app_theme_combox_box)
+        for k, v in APP_THEMES.items():
+            self.app_theme_combo_box.addItem(v[0], k)
+
+
+        self.app_theme_combo_box.currentIndexChanged.connect(
+            self.app_theme_changed
+        )
+
+        self.app_theme_hl.addWidget(self.app_theme_combo_box)
 
         self.vertical_layout.addLayout(self.app_theme_hl)
 
@@ -111,6 +144,14 @@ class PanktiSettingsDialog(QtWidgets.QDialog):
             self.scroll_area_widget_contents
         )
 
+        for item in EDITOR_THEMES:
+            self.editor_theme_combo_box.addItem(item[1], item[0])
+
+        self.editor_theme_combo_box.currentIndexChanged.connect(
+            self.editor_theme_changed
+        )
+
+
         self.editor_theme_hl.addWidget(self.editor_theme_label)
         self.editor_theme_hl.addWidget(self.editor_theme_combo_box)
 
@@ -127,17 +168,22 @@ class PanktiSettingsDialog(QtWidgets.QDialog):
 
         self.language_label.setText("Language")
         self.language_hl.addWidget(self.language_label)
-        self.language_combox_box = QtWidgets.QComboBox(
+        self.language_combo_box = QtWidgets.QComboBox(
             self.scroll_area_widget_contents
         )
 
-        self.language_combox_box.addItems(LANGUAGE_ITEMS)
-        self.language_hl.addWidget(self.language_combox_box)
+        for k, v in LANGUAGE_ITEMS.items():
+            self.language_combo_box.addItem(v[0], k)
+
+        self.language_combo_box.currentIndexChanged.connect(
+            self.language_changed
+        )
+
+        self.language_hl.addWidget(self.language_combo_box)
 
         self.vertical_layout.addLayout(self.language_hl)
 
         # End Fourth Row -> Language
-        
 
         # Fifth Row -> Pankti Interpreter Path
 
@@ -182,13 +228,13 @@ class PanktiSettingsDialog(QtWidgets.QDialog):
             self.scroll_area_widget_contents
         )
         self.autosave_check_box.setTristate(False)
+        
 
         self.autosave_hl.addWidget(self.autosave_check_box)
 
         self.vertical_layout.addLayout(self.autosave_hl)
 
         # End Sixth Row -> Autosave
-
 
         self.scroll_area.setWidget(self.scroll_area_widget_contents)
 
@@ -210,6 +256,8 @@ class PanktiSettingsDialog(QtWidgets.QDialog):
         self.save_button.setSizePolicy(size_policy)
         self.save_button.setText("Save")
 
+        self.save_button.clicked.connect(self.clicked_save)
+
         self.horizontal_layout_5.addWidget(self.save_button)
 
         self.cancel_button = QtWidgets.QPushButton(self.vertical_widget_2)
@@ -218,6 +266,8 @@ class PanktiSettingsDialog(QtWidgets.QDialog):
         )
         self.cancel_button.setSizePolicy(size_policy)
         self.cancel_button.setText("Cancel")
+
+        self.cancel_button.clicked.connect(self.clicked_cancel)
 
         self.horizontal_layout_5.addWidget(self.cancel_button)
         self.main_layout.addWidget(
@@ -230,6 +280,15 @@ class PanktiSettingsDialog(QtWidgets.QDialog):
         self.grid_layout.addLayout(self.main_layout, 0, 0, 1, 1)
 
         QtCore.QMetaObject.connectSlotsByName(self)
+
+    def clicked_cancel(self, v) -> None:
+        self.save = False
+
+        self.reject()
+
+    def clicked_save(self , v) -> None:
+        self.save = True
+        self.accept()
 
     # setupUi
 

@@ -9,7 +9,8 @@ from PySide6.QtGui import (
 )  # type: ignore
 
 from pankti import keywords
-from themes.syntaxstyle import SyntaxStyle, atom_one_light
+from themes.syntaxstyle import *
+from themes.syntaxclass import *
 
 
 @dataclass
@@ -27,32 +28,22 @@ class PanktiSyntaxHighlighter(QSyntaxHighlighter):
     def __init__(self, parent) -> None:
         super().__init__(parent)
 
-    def set_theme(self , theme : SyntaxStyle) -> None:
+    def set_theme(self, theme: SyntaxStyle) -> None:
         keyword_format = QTextCharFormat()
-        keyword_format.setForeground(
-            QBrush(QColor(theme.keyword))
-        )
+        keyword_format.setForeground(QBrush(QColor(theme.keyword)))
 
         literal_format = QTextCharFormat()
-        literal_format.setForeground(
-            QBrush(QColor(theme.literal))
-        )
+        literal_format.setForeground(QBrush(QColor(theme.literal)))
 
         string_format = QTextCharFormat()
-        string_format.setForeground(
-            QBrush(QColor(theme.string))
-        )
+        string_format.setForeground(QBrush(QColor(theme.string)))
 
         number_format = QTextCharFormat()
 
-        number_format.setForeground(
-            QBrush(QColor(theme.number))
-        )
+        number_format.setForeground(QBrush(QColor(theme.number)))
 
         builtin_format = QTextCharFormat()
-        builtin_format.setForeground(
-            QBrush(QColor(theme.builtin))
-        )
+        builtin_format.setForeground(QBrush(QColor(theme.builtin)))
 
         self.highlight_rule = HighlightRule(
             keyword=keyword_format,

@@ -1,12 +1,12 @@
 from themes.syntaxclass import SyntaxStyle
 
-atom_one_light_theme = SyntaxStyle(
+one_light_theme = SyntaxStyle(
     bg="#fafafa",
     fg="#383a42",
     keyword="#a626a4",
-    literal="#0184bb",
+    literal="#d75f00",
     string="#50a14f",
-    number="#986801",
+    number="#d75f00",
     builtin="#383a42",
     comment="#a0a1a7",
 )  # type: SyntaxStyle
