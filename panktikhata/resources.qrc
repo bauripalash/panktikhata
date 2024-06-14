@@ -6,6 +6,14 @@
 		<file alias="folder_open.svg">assets/icons/material_folder_open.svg</file>
 		<file alias="save.svg">assets/icons/material_save.svg</file>
 		<file alias="power_settings_new.svg">assets/icons/material_power_settings_new.svg</file>
+		<file alias="copy.svg">assets/icons/material_content_copy.svg</file>
+		<file alias="cut.svg">assets/icons/material_content_cut.svg</file>
+		<file alias="paste.svg">assets/icons/material_content_paste.svg</file>
+		<file alias="find_replace.svg">assets/icons/material_find_replace.svg</file>
+		<file alias="undo.svg">assets/icons/material_undo.svg</file>
+		<file alias="redo.svg">assets/icons/material_redo.svg</file>
+		<file alias="select_all.svg">assets/icons/material_select_all.svg</file>
+		<file alias="search.svg">assets/icons/material_search.svg</file>
     </qresource>
 
 	<qresource prefix="fonts">

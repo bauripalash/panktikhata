@@ -12,7 +12,7 @@ rc:
 run:
 	poetry run python $(MAIN_SCRIPT)
 
-format:
+fmt:
 	poetry run ruff format $(MODULE_DIR) 
 
 lint:

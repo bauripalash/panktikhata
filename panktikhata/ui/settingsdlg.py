@@ -2,7 +2,12 @@
 
 from PySide6 import QtCore, QtGui, QtWidgets
 
-from pankti.settings import AppLanguage, AppTheme, PanktiSettings
+from pankti.settings import (
+    AppLanguage,
+    AppTheme,
+    PanktiSettings,
+    app_theme_to_str,
+)
 from themes.syntaxstyle import THEMES  # type: ignore
 
 APP_THEMES = {
@@ -109,6 +114,10 @@ class PanktiSettingsDialog(QtWidgets.QDialog):
         for k, v in APP_THEMES.items():
             self.app_theme_combo_box.addItem(v[0], k)
 
+        self.app_theme_combo_box.setCurrentText(
+            app_theme_to_str(self.settings_value.app_theme).capitalize()
+        )
+
         self.app_theme_hl.addWidget(self.app_theme_combo_box)
 
         self.vertical_layout.addLayout(self.app_theme_hl)
@@ -177,6 +186,8 @@ class PanktiSettingsDialog(QtWidgets.QDialog):
             self.scroll_area_widget_contents
         )
 
+        self.pankti_path_line_edit.setText(self.settings_value.pankti_path)
+
         self.pankti_path_hl.addWidget(
             self.pankti_path_line_edit, 0, QtGui.Qt.AlignmentFlag.AlignHCenter
         )
@@ -189,6 +200,9 @@ class PanktiSettingsDialog(QtWidgets.QDialog):
         self.pankti_path_hl.addWidget(self.pankti_path_tool_button)
 
         self.vertical_layout.addLayout(self.pankti_path_hl)
+        self.pankti_path_tool_button.clicked.connect(
+            self.open_select_pankti_exe
+        )
 
         # End Fifth Row -> Pankti Interpreter Path
 
@@ -206,6 +220,8 @@ class PanktiSettingsDialog(QtWidgets.QDialog):
             self.scroll_area_widget_contents
         )
         self.autosave_check_box.setTristate(False)
+
+        self.autosave_check_box.setChecked(self.settings_value.autosave)
 
         self.autosave_hl.addWidget(self.autosave_check_box)
 
@@ -258,6 +274,16 @@ class PanktiSettingsDialog(QtWidgets.QDialog):
 
         QtCore.QMetaObject.connectSlotsByName(self)
 
+    def open_select_pankti_exe(self, _) -> None:
+        fname = QtWidgets.QFileDialog.getOpenFileName(
+            self,
+            "Select Pankti Executable",
+            "",
+            filter="Any File (*.*);;Executable (*.exe)",
+        )
+
+        self.pankti_path_line_edit.setText(fname[0])
+
     def clicked_cancel(self, _) -> None:
         self.save = False
         self.done(0)
@@ -273,6 +299,10 @@ class PanktiSettingsDialog(QtWidgets.QDialog):
         self.settings_value.editor_theme = THEMES[d]
 
         self.settings_value.font_size = self.font_size_spin_box.value()
+
+        self.settings_value.pankti_path = self.pankti_path_line_edit.text()
+
+        self.settings_value.autosave = self.autosave_check_box.isChecked()
         self.save = True
         self.done(0)
 
