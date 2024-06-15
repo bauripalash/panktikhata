@@ -5,6 +5,7 @@ from PySide6.QtWidgets import QStyle  # type: ignore
 import qdarktheme
 
 from pankti import settings
+from pankti.runner import run_code
 from ui.editor import PanktiEditor
 from themes import syntaxclass
 from ui.highlighter import PanktiSyntaxHighlighter
@@ -53,7 +54,10 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
     def setup_font(self) -> None:
         self.editor_font = QFont("Noto Serif Bengali", self.settings.font_size)
         self.input_edit.setFont(self.editor_font)
-        self.output_font = QFont("Noto Serif Bengali", self.settings.output_font_size,)
+        self.output_font = QFont(
+            "Noto Serif Bengali",
+            self.settings.output_font_size,
+        )
         self.output_edit.setFont(self.output_font)
 
     def setup_ui(self) -> None:
@@ -284,9 +288,12 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
         msgbox.exec()
 
     def run_btn_click(self, _) -> None:
-        self.output_edit.setPlainText(
-            self.input_edit.toPlainText(),
-        )
+        otuput, ok = run_code(self.settings, self.input_edit.toPlainText())
+
+        if ok:
+            self.output_edit.setPlainText(otuput)
+        else:
+            self.output_edit.setPlainText("Error")
 
     def settings_btn_click(self, _):
         dlg = PanktiSettingsDialog()

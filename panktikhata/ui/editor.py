@@ -1,12 +1,37 @@
-from PySide6.QtCore import QStringListModel, Qt
-from PySide6.QtGui import QKeyEvent, QTextCursor
-from PySide6.QtWidgets import QCompleter, QPlainTextEdit
+from PySide6 import QtWidgets
+from PySide6.QtCore import QRect, QStringListModel, Qt, QSize, Slot
+from PySide6.QtGui import (
+    QColor,
+    QKeyEvent,
+    QPainter,
+    QTextCursor,
+    QPaintEvent,
+    QResizeEvent,
+)
+from PySide6.QtWidgets import QCompleter, QPlainTextEdit, QWidget
 from pankti.keywords import KEYWORDS, LITERALS, BUILTINS
+
+
+class EditorLineNumberArea(QtWidgets.QWidget):
+    def __init__(self, editor) -> None:
+        QWidget.__init__(self, editor)
+        self._code_editor = editor
+
+    def sizeHint(self) -> QSize:
+        return QSize(self._code_editor.line_number_area_width(), 0)
+
+    def paintEvent(self, event: QPaintEvent) -> None:
+        self._code_editor.line_number_area_pain_event(event)
 
 
 class PanktiEditor(QPlainTextEdit):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+
+        self.line_number_area: QtWidgets.QWidget = EditorLineNumberArea(self)
+        self.blockCountChanged.connect(self.update_line_number_area_width)
+        self.updateRequest.connect(self.update_line_number_area)
+        self.update_line_number_area_width(0)
 
         self.comp_words = []
         self.comp_words.extend(KEYWORDS)
@@ -24,6 +49,71 @@ class PanktiEditor(QPlainTextEdit):
 
         self.tail: str = " "
         self.ignore_return: bool = False
+
+    def line_number_area_width(self):
+        digits = 1
+        max_num = max(1, self.blockCount())
+
+        while max_num >= 10:
+            max_num *= 0.1
+            digits += 1
+        space = 3 + self.fontMetrics().horizontalAdvance("9") * digits
+        return space
+
+    def resizeEvent(self, e: QResizeEvent) -> None:
+        super().resizeEvent(e)
+        cr = self.contentsRect()
+        width = self.line_number_area_width()
+        rect = QRect(cr.left(), cr.top(), width, cr.height())
+        self.line_number_area.setGeometry(rect)
+
+    def line_number_area_pain_event(self, event) -> None:
+        painter = QPainter(self.line_number_area)
+        painter.fillRect(event.rect(), QColor("#000"))
+        block = self.firstVisibleBlock()
+        block_number = block.blockNumber()
+        offset = self.contentOffset()
+        top = self.blockBoundingGeometry(block).translated(offset).top()
+        bottom = top + self.blockBoundingRect(block).height()
+
+        while block.isValid() and top <= event.rect().bottom():
+            if block.isVisible() and bottom >= event.rect().top():
+                number = str(block_number + 1)
+                painter.setPen(QColor("#fff"))
+                width = self.line_number_area.width()
+                height = self.fontMetrics().height()
+
+                painter.drawText(
+                    0,
+                    int(top),
+                    width,
+                    height,
+                    Qt.AlignmentFlag.AlignRight,
+                    number,
+                )
+
+                
+
+            block = block.next()
+            top = bottom
+            bottom = top + self.blockBoundingRect(block).height()
+            block_number += 1
+
+        painter.end()
+
+    @Slot()
+    def update_line_number_area_width(self, _):
+        self.setViewportMargins(self.line_number_area_width(), 0, 0, 0)
+
+    @Slot()
+    def update_line_number_area(self, rect, dy):
+        if dy:
+            self.line_number_area.scroll(0, dy)
+        else:
+            width = self.line_number_area.width()
+            self.line_number_area.update(0, rect.y(), width, rect.height())
+        if rect.contains(self.viewport().rect()):
+            self.update_line_number_area_width(0)
 
     def complete(self):
         cur = self.textCursor()

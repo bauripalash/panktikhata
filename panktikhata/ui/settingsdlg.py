@@ -298,7 +298,7 @@ class PanktiSettingsDialog(QtWidgets.QDialog):
             self,
             "Select Pankti Executable",
             "",
-            filter="Any File (*.*);;Executable (*.exe)",
+            filter="Any File (*);;Executable (*.exe)",
         )
 
         self.pankti_path_line_edit.setText(fname[0])
