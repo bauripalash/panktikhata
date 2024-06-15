@@ -55,6 +55,7 @@ class PanktiSettings:
     language: AppLanguage
     pankti_path: str
     font_size: int
+    output_font_size: int
     autosave: bool
 
     def __init__(self) -> None:
@@ -63,6 +64,7 @@ class PanktiSettings:
         self.language = AppLanguage.ENGLISH
         self.pankti_path = "pankti"
         self.font_size = 20
+        self.output_font_size = 10
         self.autosave = True
 
     def as_dict(self) -> Dict[str, Any]:
@@ -71,6 +73,7 @@ class PanktiSettings:
         result["editor_theme"] = get_syntaxstyle_as_dict(self.editor_theme)
         result["language"] = self.language
         result["font_size"] = self.font_size
+        result["output_font_size"] = self.output_font_size
         result["autosave"] = self.autosave
         result["pankti_path"] = self.pankti_path
 
@@ -89,13 +92,14 @@ class PanktiSettings:
         return True
 
     def __repr__(self) -> str:
-        return "S<|{0}|{1}|{2}|{3}|{4}|{5}|>".format(
+        return "S<|{0}|{1}|{2}|{3}|{4}|{5}|{6}|>".format(
             self.app_theme,
             self.editor_theme.tname,
             self.font_size,
             self.language,
             self.pankti_path,
             self.autosave,
+            self.output_font_size,
         )
 
 
@@ -141,6 +145,8 @@ def decoder_pankti_settings(dct: Dict[Any, Any]) -> Any:
         s.language = AppLanguage(int(dct["language"]))
     if "font_size" in dct:
         s.font_size = int(dct["font_size"])
+    if "output_font_size" in dct:
+        s.output_font_size = int(dct["output_font_size"])
     if "pankti_path" in dct:
         s.pankti_path = dct["pankti_path"]
     if "autosave" in dct:
@@ -150,7 +156,7 @@ def decoder_pankti_settings(dct: Dict[Any, Any]) -> Any:
         else:
             s.autosave = False
     if "editor_theme" in dct:
-        print(">>>>>>>>>>", dct["editor_theme"])
+        # print(">>>>>>>>>>", dct["editor_theme"])
         s.editor_theme = get_syntaxstyle_from_dict(dct["editor_theme"])
 
     return s

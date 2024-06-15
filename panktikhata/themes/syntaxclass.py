@@ -50,8 +50,19 @@ def get_syntaxstyle_from_dict(s: Dict[str, str]) -> SyntaxStyle:
     return st
 
 
-def get_stylesheet(s: SyntaxStyle, fontsize: int) -> str:
-    return (
-        "QPlainTextEdit { font-size: %d; color: %s; background-color: %s }"
-        % (fontsize, s.fg, s.bg)
+def get_stylesheet(
+    s: SyntaxStyle,
+) -> str:
+    return """QPlainTextEdit#input_edit {{
+            color: {fg};
+            background-color: {bg};
+        }}
+
+        QPlainTextEdit#output_edit {{
+            color: {fg};
+            background-color: {bg};
+        }}
+        """.format(
+        fg=s.fg,
+        bg=s.bg,
     )

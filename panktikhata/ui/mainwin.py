@@ -21,8 +21,10 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
         super().__init__()
 
         self.settings = self.load_settings()
+        self.enable_themes: bool = True
 
-        self.setup_theme()
+        if self.enable_themes:
+            self.setup_theme()
         self.setup_ui()
         self.setup_font()
 
@@ -38,8 +40,9 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
         self.fontdb.addApplicationFont(":/fonts/noto_regular.ttf")
         self.fontdb.addApplicationFont(":/fonts/noto_bold.ttf")
         self.editor_stylesheet = syntaxclass.get_stylesheet(
-            self.settings.editor_theme, self.settings.font_size
+            self.settings.editor_theme,
         )
+
         qdarktheme.setup_theme(
             theme=settings.app_theme_to_str(self.settings.app_theme),
             additional_qss=self.editor_stylesheet,
@@ -50,11 +53,10 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
     def setup_font(self) -> None:
         self.editor_font = QFont("Noto Serif Bengali", self.settings.font_size)
         self.input_edit.setFont(self.editor_font)
-        self.output_edit.setFont(self.editor_font)
+        self.output_font = QFont("Noto Serif Bengali", self.settings.output_font_size,)
+        self.output_edit.setFont(self.output_font)
 
     def setup_ui(self) -> None:
-        self.autocomplete_words = ["dhori", "kaj", "nil"]
-
         self.resize(800, 600)
         self.root_widget = QtWidgets.QWidget()
         self.horizontal_layout = QtWidgets.QHBoxLayout(self.root_widget)
@@ -85,7 +87,7 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
 
         self.run_button = QtWidgets.QPushButton(self.button_frame)
         self.run_button.setIcon(self.run_icon)
-        self.run_button.clicked.connect(self.btn_click)
+        self.run_button.clicked.connect(self.run_btn_click)
         self.button_box.addWidget(
             self.run_button, 0, QtGui.Qt.AlignmentFlag.AlignTop
         )
@@ -98,6 +100,7 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
         self.editor_splitter = QtWidgets.QSplitter(self.root_widget)
         self.editor_splitter.setOrientation(QtGui.Qt.Orientation.Vertical)
         self.input_edit = PanktiEditor(self.editor_splitter)
+        self.input_edit.setObjectName("input_edit")
         # self.input_edit.comps.setStringList(["dhori", "kaj"])
 
         # QtWidgets.QPlainTextEdit(self.editor_splitter)
@@ -108,6 +111,7 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
         self.editor_splitter.addWidget(self.input_edit)
 
         self.output_edit = QtWidgets.QPlainTextEdit(self.editor_splitter)
+        self.output_edit.setObjectName("output_edit")
         self.editor_splitter.addWidget(self.output_edit)
 
         self.editor_box.addWidget(self.editor_splitter)
@@ -137,6 +141,10 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
             QIcon(":/icons/save.svg"), "&Save", self
         )
 
+        self.save_as_menu_action = QAction(
+            QIcon(":/icons/save_as.svg"), "&Save as", self
+        )
+
         self.quit_menu_action = QAction(
             QIcon(":/icons/power_settings_new.svg"), "&Quit", self
         )
@@ -145,6 +153,7 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
         self.file_menu.addAction(self.new_menu_action)
         self.file_menu.addAction(self.open_menu_action)
         self.file_menu.addAction(self.save_menu_action)
+        self.file_menu.addAction(self.save_as_menu_action)
         self.file_menu.addSeparator()
         self.file_menu.addAction(self.quit_menu_action)
 
@@ -184,10 +193,20 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
             "&Find",
             self,
         )
-        self.find_and_replace_menu_ction = QAction(
+        self.find_and_replace_menu_action = QAction(
             QIcon(":/icons/find_replace.svg"),
             "&Find & Replace",
             self,
+        )
+
+        self.settings_menu_action = QAction(
+            QIcon(":/icons/settings.svg"),
+            "&Settings",
+            self,
+        )
+
+        self.settings_menu_action.triggered.connect(
+            self.settings_btn_click,
         )
 
         self.edit_menu = self.menubar.addMenu("&Edit")
@@ -200,12 +219,59 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
         self.edit_menu.addAction(self.select_all_menu_action)
         self.edit_menu.addSeparator()
         self.edit_menu.addAction(self.find_menu_action)
-        self.edit_menu.addAction(self.find_and_replace_menu_ction)
+        self.edit_menu.addAction(self.find_and_replace_menu_action)
+        self.edit_menu.addSeparator()
+        self.edit_menu.addAction(self.settings_menu_action)
+
+        self.run_menu_action = QAction(
+            QIcon(":/icons/play_arrow.svg"),
+            "&Run",
+            self,
+        )
+
+        self.clear_output_menu_action = QAction(
+            QIcon(":/icons/mop.svg"),
+            "&Clear Output",
+            self,
+        )
+
+        self.examples_menu_action = QAction(
+            QIcon(":/icons/shopping_bag.svg"),
+            "&Examples",
+            self,
+        )
+
+        self.run_menu = self.menubar.addMenu("&Run")
+        self.run_menu.addAction(self.run_menu_action)
+        self.run_menu.addAction(self.examples_menu_action)
+        self.run_menu.addAction(self.clear_output_menu_action)
+
+        self.help_menu_action = QAction(
+            QIcon(":/icons/support.svg"),
+            "&Help",
+            self,
+        )
+        self.about_menu_action = QAction(
+            QIcon(":/icons/about.svg"),
+            "&About",
+            self,
+        )
+        self.learn_menu_action = QAction(
+            QIcon(":/icons/book.svg"),
+            "&Learn Pankti",
+            self,
+        )
+        self.help_menu = self.menubar.addMenu("&Help")
+        self.help_menu.addAction(self.help_menu_action)
+        self.help_menu.addAction(self.about_menu_action)
+        self.help_menu.addAction(self.learn_menu_action)
 
         self.setMenuBar(self.menubar)
 
     def redraw_settings(self) -> None:
-        self.highlighter.set_theme(self.settings.editor_theme)
+        self.highlighter.set_theme(
+            self.settings.editor_theme,
+        )
         self.setup_theme()
         self.input_edit.update()
         self.output_edit.update()
@@ -217,7 +283,12 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
         msgbox.setText(text)
         msgbox.exec()
 
-    def btn_click(self, _):
+    def run_btn_click(self, _) -> None:
+        self.output_edit.setPlainText(
+            self.input_edit.toPlainText(),
+        )
+
+    def settings_btn_click(self, _):
         dlg = PanktiSettingsDialog()
         dlg.setup(self.settings)
         dlg.exec()

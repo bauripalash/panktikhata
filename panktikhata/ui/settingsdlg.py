@@ -95,6 +95,25 @@ class PanktiSettingsDialog(QtWidgets.QDialog):
 
         self.vertical_layout.addLayout(self.font_size_hl)
 
+        self.output_font_size_hl = QtWidgets.QHBoxLayout()
+        self.output_font_size_label = QtWidgets.QLabel(
+            self.scroll_area_widget_contents
+        )
+        self.output_font_size_label.setText("Output Font Size")
+
+        self.output_font_size_spin_box = QtWidgets.QSpinBox(
+            self.scroll_area_widget_contents
+        )
+
+        self.output_font_size_spin_box.setValue(
+            self.settings_value.output_font_size
+        )
+
+        self.output_font_size_hl.addWidget(self.output_font_size_label)
+        self.output_font_size_hl.addWidget(self.output_font_size_spin_box)
+
+        self.vertical_layout.addLayout(self.output_font_size_hl)
+
         # End First Row -> Font Size
 
         # Second Row -> App Theme
@@ -299,6 +318,9 @@ class PanktiSettingsDialog(QtWidgets.QDialog):
         self.settings_value.editor_theme = THEMES[d]
 
         self.settings_value.font_size = self.font_size_spin_box.value()
+        self.settings_value.output_font_size = (
+            self.output_font_size_spin_box.value()
+        )
 
         self.settings_value.pankti_path = self.pankti_path_line_edit.text()
 

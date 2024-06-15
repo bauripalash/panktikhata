@@ -14,6 +14,13 @@
 		<file alias="redo.svg">assets/icons/material_redo.svg</file>
 		<file alias="select_all.svg">assets/icons/material_select_all.svg</file>
 		<file alias="search.svg">assets/icons/material_search.svg</file>
+		<file alias="about.svg">assets/icons/material_about.svg</file>
+		<file alias="book.svg">assets/icons/material_book.svg</file>
+		<file alias="mop.svg">assets/icons/material_mop.svg</file>
+		<file alias="settings.svg">assets/icons/material_settings.svg</file>
+		<file alias="shopping_bag.svg">assets/icons/material_shopping_bag.svg</file>
+		<file alias="support.svg">assets/icons/material_support.svg</file>
+		<file alias="save_as.svg">assets/icons/material_save_as.svg</file>
     </qresource>
 
 	<qresource prefix="fonts">
