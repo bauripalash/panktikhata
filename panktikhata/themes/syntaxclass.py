@@ -30,6 +30,19 @@ class SyntaxStyle:
     tname: str
 
 
+def dummy_syntaxstyle() -> SyntaxStyle:
+    return SyntaxStyle(
+        bg="#000",
+        fg="#fff",
+        keyword="#fff",
+        literal="#fff",
+        string="#fff",
+        number="#fff",
+        builtin="#fff",
+        comment="#fff",
+        tname="Dummy"
+    )
+
 def get_syntaxstyle_as_dict(s: SyntaxStyle) -> Dict[str, Any]:
     return asdict(s)
 

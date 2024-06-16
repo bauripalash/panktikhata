@@ -1,4 +1,5 @@
 from PySide6 import QtWidgets
+from PySide6 import QtCore
 from PySide6.QtCore import QRect, QStringListModel, Qt, QSize, Slot
 from PySide6.QtGui import (
     QColor,
@@ -10,6 +11,7 @@ from PySide6.QtGui import (
 )
 from PySide6.QtWidgets import QCompleter, QPlainTextEdit, QWidget
 from pankti.keywords import KEYWORDS, LITERALS, BUILTINS
+from themes.syntaxclass import SyntaxStyle, dummy_syntaxstyle
 
 
 class EditorLineNumberArea(QtWidgets.QWidget):
@@ -46,6 +48,9 @@ class PanktiEditor(QPlainTextEdit):
         self.completer.activated.connect(self.insert_completion)
 
         # self.setFont(QFont("Noto Serif Bengali", 14))
+        self.syntaxstyle : SyntaxStyle = dummy_syntaxstyle()
+        self.use_space_indent : bool = True
+        self.tab_width : int = 4
 
         self.tail: str = " "
         self.ignore_return: bool = False
@@ -69,7 +74,8 @@ class PanktiEditor(QPlainTextEdit):
 
     def line_number_area_pain_event(self, event) -> None:
         painter = QPainter(self.line_number_area)
-        painter.fillRect(event.rect(), QColor("#000"))
+        painter.setFont(self.font())
+        painter.fillRect(event.rect(), QColor(self.syntaxstyle.bg))
         block = self.firstVisibleBlock()
         block_number = block.blockNumber()
         offset = self.contentOffset()
@@ -79,7 +85,7 @@ class PanktiEditor(QPlainTextEdit):
         while block.isValid() and top <= event.rect().bottom():
             if block.isVisible() and bottom >= event.rect().top():
                 number = str(block_number + 1)
-                painter.setPen(QColor("#fff"))
+                painter.setPen(QColor(self.syntaxstyle.fg))
                 width = self.line_number_area.width()
                 height = self.fontMetrics().height()
 
@@ -154,7 +160,13 @@ class PanktiEditor(QPlainTextEdit):
             return
 
         if e.key() == Qt.Key.Key_Tab:
-            e.ignore()
+            if self.use_space_indent:
+                self.insertPlainText(self.tab_width * " ")
+                e.accept()
+                #e.ignore()
+                return
+            else:
+                e.ignore()
         elif e.key() == Qt.Key.Key_Backtab:
             e.ignore()
             return

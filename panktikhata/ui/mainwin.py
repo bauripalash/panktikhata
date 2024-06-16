@@ -54,6 +54,8 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
     def setup_font(self) -> None:
         self.editor_font = QFont("Noto Serif Bengali", self.settings.font_size)
         self.input_edit.setFont(self.editor_font)
+        self.input_edit.syntaxstyle = self.settings.editor_theme
+        #self.input_edit.linepainter.setFont(self.editor_font)
         self.output_font = QFont(
             "Noto Serif Bengali",
             self.settings.output_font_size,
@@ -105,6 +107,8 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
         self.editor_splitter.setOrientation(QtGui.Qt.Orientation.Vertical)
         self.input_edit = PanktiEditor(self.editor_splitter)
         self.input_edit.setObjectName("input_edit")
+        fontwidth = QtGui.QFontMetrics(self.input_edit.font()).averageCharWidth()
+        self.input_edit.setTabStopDistance(4 * fontwidth)
         # self.input_edit.comps.setStringList(["dhori", "kaj"])
 
         # QtWidgets.QPlainTextEdit(self.editor_splitter)

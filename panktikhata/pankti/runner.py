@@ -5,12 +5,10 @@ import subprocess
 
 
 def _run(path: str, p: str) -> str:
-    print(path, p)
     r = subprocess.run(
         [p, path], stdout=subprocess.PIPE, stderr=subprocess.PIPE
     )
-    print(r)
-    return r.stdout.decode()
+    return r.stdout.decode() + r.stderr.decode()
 
 
 from pankti.settings import PanktiSettings

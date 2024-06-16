@@ -17,3 +17,6 @@ fmt:
 
 lint:
 	poetry run ruff check $(MODULE_DIR)
+
+sh:
+	poetry shell
