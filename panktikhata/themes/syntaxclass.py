@@ -40,8 +40,9 @@ def dummy_syntaxstyle() -> SyntaxStyle:
         number="#fff",
         builtin="#fff",
         comment="#fff",
-        tname="Dummy"
+        tname="Dummy",
     )
+
 
 def get_syntaxstyle_as_dict(s: SyntaxStyle) -> Dict[str, Any]:
     return asdict(s)

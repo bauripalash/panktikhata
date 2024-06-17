@@ -1,8 +1,13 @@
 # -*- coding: utf-8 -*-
+from pathlib import Path
+import subprocess
+import tempfile
 from PySide6 import QtCore, QtGui, QtWidgets  # type: ignore
 from PySide6.QtGui import QAction, QFont, QFontDatabase, QIcon  # type: ignore
 from PySide6.QtWidgets import QStyle  # type: ignore
+from PySide6.QtCore import QProcess, Slot, QThreadPool
 import qdarktheme
+
 
 from pankti import settings
 from pankti.runner import run_code
@@ -18,11 +23,20 @@ except ImportError:
 
 
 class Ui_MainWindow(QtWidgets.QMainWindow):
+
+    def close(self) -> bool:
+        if self.pankti_process is not None:
+            self.pankti_process.close()
+
+        return super().close()
     def __init__(self):
         super().__init__()
 
         self.settings = self.load_settings()
         self.enable_themes: bool = True
+        self.thread_mgr = QThreadPool()
+        self.pankti_process = None
+        self.temp_file = None
 
         if self.enable_themes:
             self.setup_theme()
@@ -30,8 +44,8 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
         self.setup_font()
 
     def load_settings(self) -> settings.PanktiSettings:
-        configpath, ok = settings.config_save_path(False)
-        print(ok)
+        configpath, _ = settings.config_save_path(False)
+        #print(ok)
         s, _ = settings.get_settings_from_conf(configpath)
         return s
 
@@ -55,7 +69,7 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
         self.editor_font = QFont("Noto Serif Bengali", self.settings.font_size)
         self.input_edit.setFont(self.editor_font)
         self.input_edit.syntaxstyle = self.settings.editor_theme
-        #self.input_edit.linepainter.setFont(self.editor_font)
+        # self.input_edit.linepainter.setFont(self.editor_font)
         self.output_font = QFont(
             "Noto Serif Bengali",
             self.settings.output_font_size,
@@ -87,9 +101,9 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
         self.vertical_layout_2 = QtWidgets.QVBoxLayout(self.button_frame)
         self.button_box = QtWidgets.QVBoxLayout()
 
-        self.run_pm = QStyle.StandardPixmap.SP_MediaPlay
 
-        self.run_icon = self.style().standardIcon(self.run_pm)
+        self.run_icon = QIcon(":/icons/play_arrow.svg")
+        self.stop_icon = QIcon(":/icons/stop.svg")
 
         self.run_button = QtWidgets.QPushButton(self.button_frame)
         self.run_button.setIcon(self.run_icon)
@@ -107,7 +121,9 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
         self.editor_splitter.setOrientation(QtGui.Qt.Orientation.Vertical)
         self.input_edit = PanktiEditor(self.editor_splitter)
         self.input_edit.setObjectName("input_edit")
-        fontwidth = QtGui.QFontMetrics(self.input_edit.font()).averageCharWidth()
+        fontwidth = QtGui.QFontMetrics(
+            self.input_edit.font()
+        ).averageCharWidth()
         self.input_edit.setTabStopDistance(4 * fontwidth)
         # self.input_edit.comps.setStringList(["dhori", "kaj"])
 
@@ -291,13 +307,72 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
         msgbox.setText(text)
         msgbox.exec()
 
-    def run_btn_click(self, _) -> None:
-        otuput, ok = run_code(self.settings, self.input_edit.toPlainText())
+    def handle_pankti_stdout(self) -> None:
+        if self.pankti_process is not None:
+            d = self.pankti_process.readAllStandardOutput()
+            stdout_data = d.toStdString()
+            #print("OUT->", stdout_data)
+            self.output_edit.appendPlainText(stdout_data)
 
-        if ok:
-            self.output_edit.setPlainText(otuput)
-        else:
-            self.output_edit.setPlainText("Error")
+    def handle_pankti_stderr(self) -> None:
+        if self.pankti_process is not None:
+            d = self.pankti_process.readAllStandardError()
+            stderr_data = d.toStdString()
+            #print("ERR->", stderr_data)
+            self.output_edit.appendPlainText(stderr_data)
+
+    def run_code_finished(self) -> None:
+        if self.temp_file is not None:
+            self.temp_file.close()
+            self.temp_file = None
+
+        self.pankti_process = None
+        
+        #self.output_edit.appendPlainText("\n-- process finished --")
+        self.run_button.setIcon(self.run_icon)
+        self.run_button.clicked.disconnect()
+        self.run_button.clicked.connect(self.run_btn_click)
+    
+    def handle_pankti_process_state(self , state : QProcess.ProcessState) -> None:
+        if state == QProcess.ProcessState.Running:
+            self.run_button.setIcon(self.stop_icon)
+            self.run_button.clicked.disconnect()
+            self.run_button.clicked.connect(self.stop_btn_click)
+
+
+    def run_src_code(self) -> None: 
+        if self.pankti_process is not None:
+            return
+
+        if self.temp_file is not None:
+            self.temp_file.close()
+
+        src = self.input_edit.toPlainText()
+
+        pankti_path = Path(self.settings.pankti_path)
+
+        self.temp_file = tempfile.NamedTemporaryFile()
+        self.temp_file.write(src.encode())
+        self.temp_file.flush()
+
+
+        self.pankti_process = QProcess()
+        self.pankti_process.finished.connect(self.run_code_finished)
+        self.pankti_process.readyReadStandardError.connect(self.handle_pankti_stderr)
+        self.pankti_process.readyReadStandardOutput.connect(self.handle_pankti_stdout)
+        self.pankti_process.stateChanged.connect(self.handle_pankti_process_state)
+
+        self.pankti_process.start(str(pankti_path) , [self.temp_file.name])
+
+        #print(self.pankti_process.program() , self.pankti_process.arguments())
+
+
+    def run_btn_click(self, _) -> None:
+        self.run_src_code()
+
+    def stop_btn_click(self, _) -> None:
+        if self.pankti_process is not None:
+            self.pankti_process.close()
 
     def settings_btn_click(self, _):
         dlg = PanktiSettingsDialog()

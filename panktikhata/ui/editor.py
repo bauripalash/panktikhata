@@ -48,9 +48,9 @@ class PanktiEditor(QPlainTextEdit):
         self.completer.activated.connect(self.insert_completion)
 
         # self.setFont(QFont("Noto Serif Bengali", 14))
-        self.syntaxstyle : SyntaxStyle = dummy_syntaxstyle()
-        self.use_space_indent : bool = True
-        self.tab_width : int = 4
+        self.syntaxstyle: SyntaxStyle = dummy_syntaxstyle()
+        self.use_space_indent: bool = True
+        self.tab_width: int = 4
 
         self.tail: str = " "
         self.ignore_return: bool = False
@@ -97,8 +97,6 @@ class PanktiEditor(QPlainTextEdit):
                     Qt.AlignmentFlag.AlignRight,
                     number,
                 )
-
-                
 
             block = block.next()
             top = bottom
@@ -163,7 +161,7 @@ class PanktiEditor(QPlainTextEdit):
             if self.use_space_indent:
                 self.insertPlainText(self.tab_width * " ")
                 e.accept()
-                #e.ignore()
+                # e.ignore()
                 return
             else:
                 e.ignore()
