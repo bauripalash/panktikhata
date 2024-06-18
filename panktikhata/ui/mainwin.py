@@ -1,16 +1,13 @@
 # -*- coding: utf-8 -*-
 from pathlib import Path
-import subprocess
 import tempfile
 from PySide6 import QtCore, QtGui, QtWidgets  # type: ignore
 from PySide6.QtGui import QAction, QFont, QFontDatabase, QIcon  # type: ignore
-from PySide6.QtWidgets import QStyle  # type: ignore
-from PySide6.QtCore import QProcess, Slot, QThreadPool
+from PySide6.QtCore import QFile, QProcess, QStringListModel, QThreadPool
 import qdarktheme
 
 
 from pankti import settings
-from pankti.runner import run_code
 from ui.editor import PanktiEditor
 from themes import syntaxclass
 from ui.highlighter import PanktiSyntaxHighlighter
@@ -23,12 +20,12 @@ except ImportError:
 
 
 class Ui_MainWindow(QtWidgets.QMainWindow):
-
     def close(self) -> bool:
         if self.pankti_process is not None:
             self.pankti_process.close()
 
         return super().close()
+
     def __init__(self):
         super().__init__()
 
@@ -37,6 +34,9 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
         self.thread_mgr = QThreadPool()
         self.pankti_process = None
         self.temp_file = None
+        self.filename: str | None = None
+        self.is_file_unsaved = False
+        self.title_unsave_marked = False
 
         if self.enable_themes:
             self.setup_theme()
@@ -45,7 +45,7 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
 
     def load_settings(self) -> settings.PanktiSettings:
         configpath, _ = settings.config_save_path(False)
-        #print(ok)
+        # print(ok)
         s, _ = settings.get_settings_from_conf(configpath)
         return s
 
@@ -101,7 +101,6 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
         self.vertical_layout_2 = QtWidgets.QVBoxLayout(self.button_frame)
         self.button_box = QtWidgets.QVBoxLayout()
 
-
         self.run_icon = QIcon(":/icons/play_arrow.svg")
         self.stop_icon = QIcon(":/icons/stop.svg")
 
@@ -125,6 +124,7 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
             self.input_edit.font()
         ).averageCharWidth()
         self.input_edit.setTabStopDistance(4 * fontwidth)
+        self.input_edit.modificationChanged.connect(self.input_modified_update)
         # self.input_edit.comps.setStringList(["dhori", "kaj"])
 
         # QtWidgets.QPlainTextEdit(self.editor_splitter)
@@ -149,7 +149,7 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
         self.statusbar = QtWidgets.QStatusBar()
         self.setStatusBar(self.statusbar)
 
-        self.retranslate_ui()
+        self.update_title_with_filename()
         self.setup_menu()
 
         QtCore.QMetaObject.connectSlotsByName(self)
@@ -161,13 +161,25 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
         self.open_menu_action = QAction(
             QIcon(":/icons/folder_open.svg"), "&Open", self
         )
+        self.open_menu_action.setShortcut("Ctrl+O")
+
+        self.open_menu_action.triggered.connect(self.open_file)
+
         self.save_menu_action = QAction(
             QIcon(":/icons/save.svg"), "&Save", self
         )
 
+        self.save_menu_action.setShortcut("Ctrl+S")
+
+        self.save_menu_action.triggered.connect(self.save_file)
+
         self.save_as_menu_action = QAction(
             QIcon(":/icons/save_as.svg"), "&Save as", self
         )
+
+        self.save_as_menu_action.setShortcut("Ctrl+Shift+S")
+
+        self.save_as_menu_action.triggered.connect(self.save_as_file)
 
         self.quit_menu_action = QAction(
             QIcon(":/icons/power_settings_new.svg"), "&Quit", self
@@ -291,6 +303,82 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
         self.help_menu.addAction(self.learn_menu_action)
 
         self.setMenuBar(self.menubar)
+        # self.update_title_with_filename()
+
+    def input_modified_update(self, _) -> None:
+        self.update_title_with_filename()
+
+    def update_title_with_filename(self) -> None:
+        f = "untitled"
+        unsaved_marker = ""
+        if self.input_edit.document().isModified():
+            unsaved_marker = "*"
+        if self.filename is not None:
+            f = Path(self.filename).name
+
+        self.setWindowTitle(f"Pankti Khata ({unsaved_marker}{f})")
+
+    def _save_file(self, ignore_filename: bool = False) -> None:
+        if self.filename is None or ignore_filename:
+            dlg = QtWidgets.QFileDialog()
+            dlg.setNameFilters(["Pankti Source Code (*.pank)", "Any File (*)"])
+            dlg.setViewMode(QtWidgets.QFileDialog.ViewMode.Detail)
+            dlg.setDefaultSuffix("pank")
+            dlg.setOptions(QtWidgets.QFileDialog.Option.DontUseNativeDialog)
+            dlg.setAcceptMode(QtWidgets.QFileDialog.AcceptMode.AcceptSave)
+            flist: QStringListModel = QStringListModel()
+            if dlg.exec_():
+                f = dlg.selectedFiles()
+
+            if len(flist.stringList()) < 1:
+                return
+
+            fname = flist.stringList()[0]
+
+            with open(fname, "w") as f:
+                f.write(self.input_edit.toPlainText())
+                self.filename = fname
+
+                self.input_edit.document().setModified(False)
+                self.update_title_with_filename()
+        else:
+            # Todo : show msg about file not being on storage and
+            # give options to save if file doesn't exist
+
+            with open(self.filename, "w") as f:
+                f.write(self.input_edit.toPlainText())
+
+                self.input_edit.document().setModified(False)
+
+    def save_file(self, _) -> None:
+        self._save_file()
+
+    def save_as_file(self, _) -> None:
+        self._save_file(True)
+
+    def open_file(self, _) -> None:
+        fname, _ = QtWidgets.QFileDialog.getOpenFileName(
+            self,
+            "Open Pankti Source File",
+            "",
+            "Pankti Source File (*.pank);;Any File (*)",
+        )
+
+        if len(fname) < 1:
+            return
+
+        f = Path(fname)
+
+        if not f.exists() or not f.is_file():
+            self.show_message_box(f"Failed to {fname}. No Such file exists!")
+            return
+
+        with open(fname, "r") as f:
+            self.input_edit.setPlainText(f.read())
+            self.filename = fname
+
+            self.input_edit.document().setModified(False)
+            self.update_title_with_filename()
 
     def redraw_settings(self) -> None:
         self.highlighter.set_theme(
@@ -311,14 +399,14 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
         if self.pankti_process is not None:
             d = self.pankti_process.readAllStandardOutput()
             stdout_data = d.toStdString()
-            #print("OUT->", stdout_data)
+            # print("OUT->", stdout_data)
             self.output_edit.appendPlainText(stdout_data)
 
     def handle_pankti_stderr(self) -> None:
         if self.pankti_process is not None:
             d = self.pankti_process.readAllStandardError()
             stderr_data = d.toStdString()
-            #print("ERR->", stderr_data)
+            # print("ERR->", stderr_data)
             self.output_edit.appendPlainText(stderr_data)
 
     def run_code_finished(self) -> None:
@@ -327,20 +415,21 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
             self.temp_file = None
 
         self.pankti_process = None
-        
-        #self.output_edit.appendPlainText("\n-- process finished --")
+
+        # self.output_edit.appendPlainText("\n-- process finished --")
         self.run_button.setIcon(self.run_icon)
         self.run_button.clicked.disconnect()
         self.run_button.clicked.connect(self.run_btn_click)
-    
-    def handle_pankti_process_state(self , state : QProcess.ProcessState) -> None:
+
+    def handle_pankti_process_state(
+        self, state: QProcess.ProcessState
+    ) -> None:
         if state == QProcess.ProcessState.Running:
             self.run_button.setIcon(self.stop_icon)
             self.run_button.clicked.disconnect()
             self.run_button.clicked.connect(self.stop_btn_click)
 
-
-    def run_src_code(self) -> None: 
+    def run_src_code(self) -> None:
         if self.pankti_process is not None:
             return
 
@@ -355,17 +444,21 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
         self.temp_file.write(src.encode())
         self.temp_file.flush()
 
-
         self.pankti_process = QProcess()
         self.pankti_process.finished.connect(self.run_code_finished)
-        self.pankti_process.readyReadStandardError.connect(self.handle_pankti_stderr)
-        self.pankti_process.readyReadStandardOutput.connect(self.handle_pankti_stdout)
-        self.pankti_process.stateChanged.connect(self.handle_pankti_process_state)
+        self.pankti_process.readyReadStandardError.connect(
+            self.handle_pankti_stderr
+        )
+        self.pankti_process.readyReadStandardOutput.connect(
+            self.handle_pankti_stdout
+        )
+        self.pankti_process.stateChanged.connect(
+            self.handle_pankti_process_state
+        )
 
-        self.pankti_process.start(str(pankti_path) , [self.temp_file.name])
+        self.pankti_process.start(str(pankti_path), [self.temp_file.name])
 
-        #print(self.pankti_process.program() , self.pankti_process.arguments())
-
+        # print(self.pankti_process.program() , self.pankti_process.arguments())
 
     def run_btn_click(self, _) -> None:
         self.run_src_code()
@@ -392,10 +485,3 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
 
         else:
             dlg.destroy()
-
-    def retranslate_ui(self):
-        self.setWindowTitle(
-            QtCore.QCoreApplication.translate(
-                "MainWindow", "Pankti Khata", None
-            )
-        )
