@@ -1,9 +1,10 @@
 # -*- coding: utf-8 -*-
 from pathlib import Path
 import tempfile
+import typing
 from PySide6 import QtCore, QtGui, QtWidgets  # type: ignore
 from PySide6.QtGui import QAction, QFont, QFontDatabase, QIcon  # type: ignore
-from PySide6.QtCore import QFile, QProcess, QStringListModel, QThreadPool
+from PySide6.QtCore import QProcess, QStringListModel, QThreadPool
 import qdarktheme
 
 
@@ -125,9 +126,9 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
         ).averageCharWidth()
         self.input_edit.setTabStopDistance(4 * fontwidth)
         self.input_edit.modificationChanged.connect(self.input_modified_update)
-        # self.input_edit.comps.setStringList(["dhori", "kaj"])
 
-        # QtWidgets.QPlainTextEdit(self.editor_splitter)
+        self.input_edit.undoAvailable.connect(self.undo_enable)
+        self.input_edit.redoAvailable.connect(self.redo_enable)
 
         self.highlighter = PanktiSyntaxHighlighter(self.input_edit.document())
         self.highlighter.set_theme(self.settings.editor_theme)
@@ -198,30 +199,56 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
             "&Undo",
             self,
         )
+
+        self.undo_menu_action.setShortcut("Ctrl+Z")
+        self.undo_menu_action.triggered.connect(self.undo_clicked)
+        self.undo_menu_action.setEnabled(False)
+
         self.redo_menu_action = QAction(
             QIcon(":/icons/redo.svg"),
             "&Redo",
             self,
         )
+        self.redo_menu_action.setShortcut("Ctrl+Shift+Z")
+        self.redo_menu_action.triggered.connect(self.redo_clicked)
+        self.redo_menu_action.setEnabled(False)
+
         self.cut_menu_action = QAction(
             QIcon(":/icons/cut.svg"),
             "&Cut",
             self,
         )
+
+        self.cut_menu_action.setShortcut("Ctrl+X")
+        self.cut_menu_action.triggered.connect(self.cut_clicked)
+
         self.copy_menu_action = QAction(
             QIcon(":/icons/copy.svg"),
             "&Copy",
             self,
         )
+
+        self.copy_menu_action.setShortcut("Ctrl+C")
+        self.copy_menu_action.triggered.connect(self.copy_clicked)
+
         self.paste_menu_action = QAction(
             QIcon(":/icons/paste.svg"),
             "&Paste",
             self,
         )
+
+        self.paste_menu_action.setShortcut("Ctrl+V")
+        self.paste_menu_action.triggered.connect(self.paste_clicked)
+
         self.select_all_menu_action = QAction(
             QIcon(":/icons/select_all.svg"),
             "&Select All",
             self,
+        )
+
+        self.select_all_menu_action.setShortcut("Ctrl+A")
+        self.select_all_menu_action.triggered.connect(
+            self.select_all_clicked,
         )
 
         self.find_menu_action = QAction(
@@ -277,6 +304,10 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
             self,
         )
 
+        self.clear_output_menu_action.triggered.connect(
+            self.clear_output_clicked,
+        )
+
         self.run_menu = self.menubar.addMenu("&Run")
         self.run_menu.addAction(self.run_menu_action)
         self.run_menu.addAction(self.examples_menu_action)
@@ -303,7 +334,33 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
         self.help_menu.addAction(self.learn_menu_action)
 
         self.setMenuBar(self.menubar)
-        # self.update_title_with_filename()
+
+    def clear_output_clicked(self, _) -> None:
+        self.output_edit.clear()
+
+    def select_all_clicked(self, _) -> None:
+        self.input_edit.selectAll()
+
+    def cut_clicked(self, _) -> None:
+        self.input_edit.cut()
+
+    def copy_clicked(self, _) -> None:
+        self.input_edit.copy()
+
+    def paste_clicked(self, _) -> None:
+        self.input_edit.paste()
+
+    def undo_enable(self, flag: bool) -> None:
+        self.undo_menu_action.setEnabled(flag)
+
+    def undo_clicked(self, _) -> None:
+        self.input_edit.undo()
+
+    def redo_enable(self, flag: bool) -> None:
+        self.redo_menu_action.setEnabled(flag)
+
+    def redo_clicked(self, _) -> None:
+        self.input_edit.redo()
 
     def input_modified_update(self, _) -> None:
         self.update_title_with_filename()
@@ -398,16 +455,14 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
     def handle_pankti_stdout(self) -> None:
         if self.pankti_process is not None:
             d = self.pankti_process.readAllStandardOutput()
-            stdout_data = d.toStdString()
-            # print("OUT->", stdout_data)
-            self.output_edit.appendPlainText(stdout_data)
+            self.output_edit.appendPlainText(d.toStdString())
+            self.output_edit.ensureCursorVisible()
 
     def handle_pankti_stderr(self) -> None:
         if self.pankti_process is not None:
             d = self.pankti_process.readAllStandardError()
-            stderr_data = d.toStdString()
-            # print("ERR->", stderr_data)
-            self.output_edit.appendPlainText(stderr_data)
+            self.output_edit.appendPlainText(d.toStdString())
+            self.output_edit.ensureCursorVisible()
 
     def run_code_finished(self) -> None:
         if self.temp_file is not None:
