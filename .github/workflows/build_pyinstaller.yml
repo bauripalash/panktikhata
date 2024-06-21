@@ -14,9 +14,8 @@ jobs:
     runs-on: ${{matrix.os}}
     steps:
       - name: Build Exe
-      - uses: actions/checkout@v4
-      - uses: sayyid5416/pyinstaller@v1
-      - with:
+        uses: sayyid5416/pyinstaller@v1
+        with:
           python_ver: '3.12'
           spec: 'panktikhata/main.py'
           requirements: 'requirements.txt'
