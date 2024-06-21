@@ -15,8 +15,12 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5.1.0
-      - run: |
-          python -m pip install poetry
+        with:
+          python_version: "3.12"
+      - name: Setup Poetry
+        uses: abatilo/actions-poetry@v2
+      - name: Build Application
+        run: |
           poetry install
           poetry run pyside6-rcc panktikhata/resources.qrc -o panktikhata/assets/resources.py
           poetry python pyinstaller_build.py
