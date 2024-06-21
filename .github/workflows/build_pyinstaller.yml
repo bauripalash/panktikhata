@@ -19,8 +19,18 @@ jobs:
           python_version: "3.12"
       - name: Setup Poetry
         uses: abatilo/actions-poetry@v2
+      - name: Setup a local virtual environment
+        run: |
+          poetry config virtualenvs.create true --local
+          poetry config virtualenvs.in-project true --local
+      - uses: actions/cache@v3
+        name: Define a cache for the virtual environment based on the dependencies lock file
+        with:
+          path: ./.venv
+          key: venv-${{ hashFiles('poetry.lock') }}
       - name: Build Application
         run: |
+          poetry install
           poetry run pyside6-rcc panktikhata/resources.qrc -o panktikhata/assets/resources.py
           poetry python pyinstaller_build.py
         
