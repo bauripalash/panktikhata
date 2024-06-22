@@ -44,7 +44,7 @@ jobs:
       - name: Upload Artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: panktikhata-${{ matrix.os }}${{FILE_EXT}}
+          name: panktikhata-${{ matrix.os }}${{ env.FILE_EXT }}
           path: dist/panktikhata
         
         
