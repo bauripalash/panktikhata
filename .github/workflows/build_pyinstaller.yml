@@ -35,11 +35,11 @@ jobs:
           poetry run python pyinstaller_build.py
           echo "+ End Build Exe"
       - name: Setup File Extension for WIN
-        if: matrix.os == "Windows"
+        if: matrix.os == 'Windows'
         run: |
           echo "FILE_EXT=.exe" >> $GITHUB_ENV
       - name: Setup File Extension for Others
-        if: matrix.os != "Windows"
+        if: matrix.os != 'Windows'
         run: |
           echo "FILE_EXT=" >> $GITHUB_ENV
       - name: Upload Artifacts
