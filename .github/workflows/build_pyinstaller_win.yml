@@ -10,7 +10,7 @@ jobs:
   build:
     strategy:
       matrix:
-        os: [ubuntu-latest, windows-latest]
+        os: [windows-latest]
     runs-on: ${{matrix.os}}
     steps:
       - uses: actions/checkout@v4
@@ -34,20 +34,12 @@ jobs:
           echo "+ Build Exe"
           poetry run python pyinstaller_build.py
           echo "+ End Build Exe"
-      - name: Setup File Extension for WIN
-        if: runner.os == 'Windows'
-        run: |
-          echo "FILE_EXT=.exe" >> $GITHUB_ENV
-      - name: Setup File Extension for Others
-        if: runner.os != 'Windows'
-        run: |
-          echo "FILE_EXT=" >> $GITHUB_ENV
       - name: Upload Artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: panktikhata-${{ matrix.os }}${{ env.FILE_EXT }}
-          path: dist/panktikhata
+          name: panktikhata-windows.exe
+          path: dist/panktikhata.exe
         
         
           
-          
+ 

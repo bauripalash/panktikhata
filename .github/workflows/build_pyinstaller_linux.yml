@@ -1,0 +1,45 @@
+name: Build
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  build:
+    strategy:
+      matrix:
+        os: [ubuntu-latest]
+    runs-on: ${{matrix.os}}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5.1.0
+        with:
+          python-version: "3.12"
+      - name: Setup Poetry
+        uses: abatilo/actions-poetry@v2
+      - name: Setup a local virtual environment
+        run: |
+          poetry config virtualenvs.create true --local
+          poetry config virtualenvs.in-project true --local
+      - name: Build Application
+        run: |
+          echo "+ Install Deps"
+          poetry install
+          echo "+ End Install Deps"
+          echo "+ Build Res"
+          poetry run pyside6-rcc panktikhata/resources.qrc -o panktikhata/assets/resources.py
+          echo "+ End Build Res"
+          echo "+ Build Exe"
+          poetry run python pyinstaller_build.py
+          echo "+ End Build Exe"
+      - name: Upload Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: panktikhata-linux
+          path: dist/panktikhata
+        
+        
+          
+          
