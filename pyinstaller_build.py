@@ -9,5 +9,5 @@ PyInstaller.__main__.run([
     "--onefile",
     "--windowed",
     "--name",
-    f"panktikhata_{osname}",
+    f"panktikhata",
 ])
