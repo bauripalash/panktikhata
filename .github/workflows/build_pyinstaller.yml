@@ -34,13 +34,14 @@ jobs:
           echo "+ Build Exe"
           poetry run python pyinstaller_build.py
           echo "+ End Build Exe"
-      - name: Setup File Extension
+      - name: Setup File Extension for WIN
+        if: matrix.os == "Windows"
         run: |
-          if [["${{ runner.os }}" == "Windows"]]; then
-            echo "FILE_EXT=.exe" >> $GITHUB_ENV
-          else
-            echo "FILE_EXT=" >> $GITHUB_ENV
-          fi
+          echo "FILE_EXT=.exe" >> $GITHUB_ENV
+      - name: Setup File Extension for Others
+        if: matrix.os != "Windows"
+        run: |
+          echo "FILE_EXT=" >> $GITHUB_ENV
       - name: Upload Artifacts
         uses: actions/upload-artifact@v4
         with:
