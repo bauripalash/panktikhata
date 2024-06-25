@@ -419,6 +419,7 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
             "Open Pankti Source File",
             "",
             "Pankti Source File (*.pank);;Any File (*)",
+            options=QtWidgets.QFileDialog.Option.DontUseNativeDialog,
         )
 
         if len(fname) < 1:
