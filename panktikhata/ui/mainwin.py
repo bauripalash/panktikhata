@@ -10,6 +10,8 @@ import qdarktheme
 
 
 from pankti import settings
+from ui.helpdlg import PanktiHelpDialog
+from ui.aboutdlg import PanktiAboutDialog
 from ui.editor import PanktiEditor
 from themes import syntaxclass
 from ui.highlighter import PanktiSyntaxHighlighter
@@ -52,7 +54,6 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
         return s
 
     def setup_theme(self) -> None:
-        
         self.setWindowIcon(QIcon(":/appicons/icon.ico"))
 
         self.fontdb = QFontDatabase()
@@ -322,10 +323,15 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
             "&Help",
             self,
         )
+        self.help_menu_action.triggered.connect(self.help_clicked)
+        self.help_menu_action.setShortcut("F1")
         self.about_menu_action = QAction(
             QIcon(":/icons/about.svg"),
             "&About",
             self,
+        )
+        self.about_menu_action.triggered.connect(
+            self.about_clicked,
         )
         self.learn_menu_action = QAction(
             QIcon(":/icons/book.svg"),
@@ -338,6 +344,14 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
         self.help_menu.addAction(self.learn_menu_action)
 
         self.setMenuBar(self.menubar)
+
+    def help_clicked(self, _) -> None:
+        dlg = PanktiHelpDialog()
+        dlg.exec()
+
+    def about_clicked(self, _) -> None:
+        dlg = PanktiAboutDialog()
+        dlg.exec()
 
     def clear_output_clicked(self, _) -> None:
         self.output_edit.clear()
@@ -387,7 +401,7 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
             dlg.setDefaultSuffix("pank")
             dlg.setOptions(QtWidgets.QFileDialog.Option.DontUseNativeDialog)
             dlg.setAcceptMode(QtWidgets.QFileDialog.AcceptMode.AcceptSave)
-            flist : List[str] = []
+            flist: List[str] = []
             if dlg.exec_():
                 flist = dlg.selectedFiles()
 
@@ -396,7 +410,7 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
 
             fname = flist[0]
 
-            with open(fname, "w" , encoding="utf-8") as f:
+            with open(fname, "w", encoding="utf-8") as f:
                 f.write(self.input_edit.toPlainText())
                 self.filename = fname
 
@@ -435,7 +449,7 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
             self.show_message_box(f"Failed to {fname}. No Such file exists!")
             return
 
-        with open(fname, "r" , encoding="utf-8") as f:
+        with open(fname, "r", encoding="utf-8") as f:
             self.input_edit.setPlainText(f.read())
             self.filename = fname
 

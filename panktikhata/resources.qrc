@@ -26,6 +26,8 @@
 
 	<qresource prefix="appicons">
 		<file alias="icon.ico">assets/app_icons/icon.ico</file>
+
+		<file alias="logo_96x.png">assets/app_icons/panktikhata_96x.png</file>
 	</qresource>
 
 	<qresource prefix="fonts">
