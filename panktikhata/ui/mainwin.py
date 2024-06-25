@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+from typing import List
 from pathlib import Path
 import tempfile
 import typing
@@ -383,16 +384,16 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
             dlg.setDefaultSuffix("pank")
             dlg.setOptions(QtWidgets.QFileDialog.Option.DontUseNativeDialog)
             dlg.setAcceptMode(QtWidgets.QFileDialog.AcceptMode.AcceptSave)
-            flist: QStringListModel = QStringListModel()
+            flist : List[str] = []
             if dlg.exec_():
-                f = dlg.selectedFiles()
+                flist = dlg.selectedFiles()
 
-            if len(flist.stringList()) < 1:
+            if len(flist) < 1:
                 return
 
-            fname = flist.stringList()[0]
+            fname = flist[0]
 
-            with open(fname, "w") as f:
+            with open(fname, "w" , encoding="utf-8") as f:
                 f.write(self.input_edit.toPlainText())
                 self.filename = fname
 
@@ -402,7 +403,7 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
             # Todo : show msg about file not being on storage and
             # give options to save if file doesn't exist
 
-            with open(self.filename, "w") as f:
+            with open(self.filename, "w", encoding="utf-8") as f:
                 f.write(self.input_edit.toPlainText())
 
                 self.input_edit.document().setModified(False)
@@ -431,7 +432,7 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
             self.show_message_box(f"Failed to {fname}. No Such file exists!")
             return
 
-        with open(fname, "r") as f:
+        with open(fname, "r" , encoding="utf-8") as f:
             self.input_edit.setPlainText(f.read())
             self.filename = fname
 
