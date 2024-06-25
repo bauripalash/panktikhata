@@ -24,6 +24,10 @@
 		<file alias="save_as.svg">assets/icons/material_save_as.svg</file>
     </qresource>
 
+	<qresource prefix="appicons">
+		<file alias="icon.ico">assets/app_icons/icon.ico</file>
+	</qresource>
+
 	<qresource prefix="fonts">
 		<file alias="noto_regular.ttf">assets/fonts/NotoSerifBengali-Regular.ttf</file>
 		<file alias="noto_bold.ttf">assets/fonts/NotoSerifBengali-Bold.ttf</file>

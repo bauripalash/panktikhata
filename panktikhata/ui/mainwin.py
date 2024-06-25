@@ -52,6 +52,9 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
         return s
 
     def setup_theme(self) -> None:
+        
+        self.setWindowIcon(QIcon(":/appicons/icon.ico"))
+
         self.fontdb = QFontDatabase()
 
         self.fontdb.addApplicationFont(":/fonts/noto_regular.ttf")
