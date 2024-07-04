@@ -70,11 +70,13 @@ def get_stylesheet(
     return """QPlainTextEdit#input_edit {{
             color: {fg};
             background-color: {bg};
+            font-family: 'Noto Serif Bengali', 'Noto Color Emoji', monospace;
         }}
 
         QPlainTextEdit#output_edit {{
             color: {fg};
             background-color: {bg};
+            font-family: 'Noto Serif Bengali', 'Noto Color Emoji', monospace;
         }}
         """.format(
         fg=s.fg,

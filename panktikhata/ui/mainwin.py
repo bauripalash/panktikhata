@@ -60,6 +60,8 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
 
         self.fontdb.addApplicationFont(":/fonts/noto_regular.ttf")
         self.fontdb.addApplicationFont(":/fonts/noto_bold.ttf")
+        self.fontdb.addApplicationFont(":/fonts/noto_color_emoji.ttf")
+
         self.editor_stylesheet = syntaxclass.get_stylesheet(
             self.settings.editor_theme,
         )
@@ -71,13 +73,17 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
 
         # print(self.editor_stylesheet)
 
+        # print(self.editor_stylesheet)
+
     def setup_font(self) -> None:
-        self.editor_font = QFont("Noto Serif Bengali", self.settings.font_size)
+        self.editor_font = QFont(
+            ["Noto Serif Bengali", "Noto Color Emoji"], self.settings.font_size
+        )
         self.input_edit.setFont(self.editor_font)
         self.input_edit.syntaxstyle = self.settings.editor_theme
         # self.input_edit.linepainter.setFont(self.editor_font)
         self.output_font = QFont(
-            "Noto Serif Bengali",
+            ["Noto Serif Bengali", "Noto Color Emoji"],
             self.settings.output_font_size,
         )
         self.output_edit.setFont(self.output_font)
@@ -461,10 +467,9 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
             self.settings.editor_theme,
         )
         self.setup_theme()
+        self.setup_font()
         self.input_edit.update()
         self.output_edit.update()
-
-        self.setup_font()
 
     def show_message_box(self, text: str) -> None:
         msgbox = QtWidgets.QMessageBox()
