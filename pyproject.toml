@@ -16,7 +16,7 @@ pyqtdarktheme = {git = "https://github.com/bauripalash/PyQtDarkTheme-fork", rev 
 
 [tool.poetry.group.dev.dependencies]
 pyright = "^1"
-ruff = "^0.4.8"
+ruff = "^0.5.2"
 
 [build-system]
 requires = ["poetry-core"]
